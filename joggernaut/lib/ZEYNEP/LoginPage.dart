@@ -58,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 24,
-                        color: Colors.deepPurpleAccent)),
+                        color: Color.fromRGBO(124, 77, 255, 1))),
 
                 // LOGO
                 Image(image: AssetImage('Assets/logopng.png')),
