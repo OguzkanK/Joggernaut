@@ -5,6 +5,10 @@ import 'package:pedometer/pedometer.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_foreground_service/flutter_foreground_service.dart';
+import 'package:firebase_core/firebase_core.dart';
+
+import 'ZEYNEP/LoginPage.dart';
+import 'ZEYNEP/RedirectPage.dart'; // Firebase import
 
 DateTime now = DateTime.now();
 
@@ -12,8 +16,10 @@ String formatDate(DateTime d) {
   return d.toString().substring(0, 19);
 }
 
-void main() {
-  runApp(MaterialApp(home: MyApp()));
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized(); //Firebase starting
+  await Firebase.initializeApp(); //Firebase starting
+  runApp(const MyApp());
   startForegroundService();
 }
 
@@ -21,11 +27,17 @@ void startForegroundService() async {
   ForegroundService().start();
 }
 
-class MyApp extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
-}
 
+class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: MainPage(),
+    );_MyAppState createState() => _MyAppState();
+}
+  
 class _MyAppState extends State<MyApp> {
   int previousSteps = 0;
   late Stream<StepCount> _stepCountStream;
