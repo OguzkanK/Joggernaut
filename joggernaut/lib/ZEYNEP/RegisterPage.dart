@@ -50,7 +50,7 @@ class _RegisterPageState extends State<RegisterPage> {
               //bu wrap yazı yazmak istedğimizde klavye çıakrken ekran bozulmasınd iye
               child: Column(children: [
                 // Welcome Part
-                Text('You should walk some you fat fuck!',
+                Text('You should walk more!',
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 24,
