@@ -96,9 +96,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   String goalChecker() {
-    int step = int.parse(_steps) - previousSteps;
+    int step = 10000 - int.parse(_steps) - previousSteps;
     return (step > 0)
-        ? "Steps Left: ${(10000 - step).toString()}"
+        ? "Steps Left: ${step.toString()}"
         : "You Reached Your Goal!";
   }
 
@@ -111,45 +111,34 @@ class _MyAppState extends State<MyApp> {
           backgroundColor: const Color.fromARGB(255, 124, 77, 255),
         ),
         body: Container(
-          decoration: const BoxDecoration(
-              gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color.fromARGB(255, 240, 255, 66),
-              Color.fromARGB(255, 55, 146, 55)
-            ],
-          )),
+          color: const Color.fromARGB(255, 255, 255, 255),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Image.asset('Assets/logopng.png',
-                        width: 130, height: 130, alignment: Alignment.topLeft),
-                    CircularPercentIndicator(
-                      radius: 80.0,
-                      lineWidth: 15.0,
-                      percent: percentageCal(),
-                      center: Text(
-                        dailySteps(),
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 15.0),
-                      ),
-                      backgroundColor: const Color.fromARGB(255, 130, 205, 71),
-                      circularStrokeCap: CircularStrokeCap.butt,
-                      progressColor: const Color.fromARGB(255, 124, 77, 255),
-                    )
-                  ]),
+              //Row(children: [
+              // Image.asset('Assets/logopng.png',
+              //     width: 130, height: 130, alignment: Alignment.topLeft),
+              const SizedBox(height: 10),
+              CircularPercentIndicator(
+                radius: 80.0,
+                lineWidth: 15.0,
+                percent: percentageCal(),
+                center: Text(
+                  dailySteps(),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 15.0),
+                ),
+                backgroundColor: const Color.fromARGB(255, 130, 205, 71),
+                circularStrokeCap: CircularStrokeCap.butt,
+                progressColor: const Color.fromARGB(255, 68, 27, 183),
+              ) /*])*/,
               Text(
                 goalChecker(),
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
               ),
               const Divider(
                 height: 100,
-                thickness: 0,
+                thickness: 1,
                 color: Color.fromARGB(255, 124, 77, 255),
               ),
               const Text(
