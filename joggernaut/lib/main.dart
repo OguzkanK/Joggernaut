@@ -95,6 +95,13 @@ class _MyAppState extends State<MyApp> {
     return (int.parse(_steps) - previousSteps).toString();
   }
 
+  String goalChecker() {
+    int step = int.parse(_steps) - previousSteps;
+    return (step > 0)
+        ? "Steps Left: ${(10000 - step).toString()}"
+        : "You Reached Your Goal!";
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -136,6 +143,10 @@ class _MyAppState extends State<MyApp> {
                       progressColor: const Color.fromARGB(255, 124, 77, 255),
                     )
                   ]),
+              Text(
+                goalChecker(),
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              ),
               const Divider(
                 height: 100,
                 thickness: 0,
@@ -151,7 +162,7 @@ class _MyAppState extends State<MyApp> {
                     : _status == 'stopped'
                         ? Icons.accessibility_new
                         : Icons.error,
-                size: 100,
+                size: 80,
               ),
               Center(
                 child: Text(
@@ -166,8 +177,7 @@ class _MyAppState extends State<MyApp> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     SizedBox(
-                        width: (MediaQuery.of(context).size.width /
-                            4), // <-- Your width
+                        width: (MediaQuery.of(context).size.width / 4),
                         height: 50,
                         child: ElevatedButton(
                           onPressed: () {},
@@ -176,11 +186,10 @@ class _MyAppState extends State<MyApp> {
                               backgroundColor:
                                   const Color.fromARGB(255, 124, 77, 255),
                               textStyle: const TextStyle(
-                                  fontSize: 12.0, fontWeight: FontWeight.bold)),
+                                  fontSize: 10.0, fontWeight: FontWeight.bold)),
                         )),
                     SizedBox(
-                        width: (MediaQuery.of(context).size.width /
-                            4), // <-- Your width
+                        width: (MediaQuery.of(context).size.width / 4),
                         height: 50,
                         child: ElevatedButton(
                           onPressed: () {},
@@ -189,11 +198,10 @@ class _MyAppState extends State<MyApp> {
                               backgroundColor:
                                   const Color.fromARGB(255, 124, 77, 255),
                               textStyle: const TextStyle(
-                                  fontSize: 12.0, fontWeight: FontWeight.bold)),
+                                  fontSize: 10.0, fontWeight: FontWeight.bold)),
                         )),
                     SizedBox(
-                        width: (MediaQuery.of(context).size.width /
-                            4), // <-- Your width
+                        width: (MediaQuery.of(context).size.width / 4),
                         height: 50,
                         child: ElevatedButton(
                           onPressed: () {},
@@ -202,11 +210,10 @@ class _MyAppState extends State<MyApp> {
                               backgroundColor:
                                   const Color.fromARGB(255, 124, 77, 255),
                               textStyle: const TextStyle(
-                                  fontSize: 12.0, fontWeight: FontWeight.bold)),
+                                  fontSize: 10.0, fontWeight: FontWeight.bold)),
                         )),
                     SizedBox(
-                        width: (MediaQuery.of(context).size.width /
-                            4), // <-- Your width
+                        width: (MediaQuery.of(context).size.width / 4),
                         height: 50,
                         child: ElevatedButton(
                           onPressed: () {},
@@ -215,7 +222,7 @@ class _MyAppState extends State<MyApp> {
                               backgroundColor:
                                   const Color.fromARGB(255, 124, 77, 255),
                               textStyle: const TextStyle(
-                                  fontSize: 12.0, fontWeight: FontWeight.bold)),
+                                  fontSize: 10.0, fontWeight: FontWeight.bold)),
                         )),
                   ])
             ],
