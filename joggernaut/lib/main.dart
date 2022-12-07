@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:joggernaut/AuthPage.dart';
+import 'package:joggernaut/ZEYNEP/HomePage.dart';
 import 'dart:async';
 
 import 'package:pedometer/pedometer.dart';
@@ -19,7 +21,7 @@ String formatDate(DateTime d) {
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized(); //Firebase starting
   await Firebase.initializeApp(); //Firebase starting
-  runApp(const MyApp());
+  runApp(MaterialApp(home: AuthPage()));
   startForegroundService();
 }
 
@@ -27,17 +29,18 @@ void startForegroundService() async {
   ForegroundService().start();
 }
 
-
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
+  // Widget build(BuildContext context) {
+  //   return MaterialApp(
+  //     debugShowCheckedModeBanner: false,
+  //     home: MainPage(),
+  //   );
+
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: MainPage(),
-    );_MyAppState createState() => _MyAppState();
+  State<MyApp> createState() => _MyAppState();
 }
-  
+
 class _MyAppState extends State<MyApp> {
   int previousSteps = 0;
   late Stream<StepCount> _stepCountStream;
