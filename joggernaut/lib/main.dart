@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'steps.dart';
 
 import 'package:pedometer/pedometer.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -7,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_foreground_service/flutter_foreground_service.dart';
 
 DateTime now = DateTime.now();
+DateTime selectedDate = now;
 
 String formatDate(DateTime d) {
   return d.toString().substring(0, 19);
@@ -33,7 +35,7 @@ class _MyAppState extends State<MyApp> {
   int weight = 70;
   late Stream<StepCount> _stepCountStream;
   late Stream<PedestrianStatus> _pedestrianStatusStream;
-  String _status = '?', _steps = '0';
+  String _status = 'Loading', _steps = '0';
 
   @override
   void initState() {
@@ -117,9 +119,11 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Joggernaut'),
+          centerTitle: true,
           backgroundColor: const Color.fromARGB(255, 124, 77, 255),
         ),
         body: Container(
@@ -127,13 +131,31 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              //Row(children: [
-              // Image.asset('Assets/logopng.png',
-              //     width: 130, height: 130, alignment: Alignment.topLeft),
-              const SizedBox(height: 10),
+              const SizedBox(),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                TextButton(
+                    child: const Text("<"),
+                    onPressed: () {
+                      setState(() {
+                        selectedDate =
+                            selectedDate.subtract(const Duration(days: 1));
+                      });
+                    }),
+                Text(DateFormat.MMMd().format(selectedDate),
+                    style: const TextStyle(
+                        fontSize: 12, fontWeight: FontWeight.bold)),
+                TextButton(
+                    child: const Text(">"),
+                    onPressed: () {
+                      setState(() {
+                        selectedDate =
+                            selectedDate.add(const Duration(days: 1));
+                      });
+                    })
+              ]),
               CircularPercentIndicator(
                 radius: 80.0,
-                lineWidth: 15.0,
+                lineWidth: 12.0,
                 percent: percentageCal(),
                 center: Text(
                   dailySteps(),
@@ -143,7 +165,7 @@ class _MyAppState extends State<MyApp> {
                 backgroundColor: const Color.fromARGB(255, 130, 205, 71),
                 circularStrokeCap: CircularStrokeCap.butt,
                 progressColor: const Color.fromARGB(255, 68, 27, 183),
-              ) /*])*/,
+              ),
               Row(children: [
                 Padding(
                   padding: EdgeInsets.fromLTRB(
@@ -187,7 +209,6 @@ class _MyAppState extends State<MyApp> {
                 ),
               ]),
               const Divider(
-                height: 100,
                 thickness: 1,
                 color: Color.fromARGB(255, 124, 77, 255),
               ),
@@ -207,8 +228,8 @@ class _MyAppState extends State<MyApp> {
                 child: Text(
                   _status,
                   style: _status == 'walking' || _status == 'stopped'
-                      ? const TextStyle(fontSize: 30)
-                      : const TextStyle(fontSize: 20),
+                      ? const TextStyle(fontSize: 20)
+                      : const TextStyle(fontSize: 15),
                 ),
               ),
               Row(
