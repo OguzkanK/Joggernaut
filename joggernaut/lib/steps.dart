@@ -29,7 +29,7 @@ class StateStepsPage extends State<StepsPage> {
   int weight = 70;
   late Stream<StepCount> _stepCountStream;
   late Stream<PedestrianStatus> _pedestrianStatusStream;
-  String _status = 'Not Available', _steps = '0';
+  String _status = 'Loading', _steps = '0';
 
   @override
   void initState() {
@@ -64,7 +64,7 @@ class StateStepsPage extends State<StepsPage> {
 
   void onPedestrianStatusError(error) {
     setState(() {
-      _status = 'Not Available';
+      _status = 'Loading';
     });
   }
 
@@ -116,8 +116,7 @@ class StateStepsPage extends State<StepsPage> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Joggernaut'),
-          centerTitle: true,
+          title: const Text('    Joggernaut'),
           backgroundColor: const Color.fromARGB(255, 124, 77, 255),
         ),
         body: Container(
@@ -137,7 +136,7 @@ class StateStepsPage extends State<StepsPage> {
                     }),
                 Text(DateFormat.MMMd().format(selectedDate),
                     style: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.bold)),
+                        fontSize: 17, fontWeight: FontWeight.bold)),
                 TextButton(
                     child: const Text(">"),
                     onPressed: () {
@@ -154,16 +153,15 @@ class StateStepsPage extends State<StepsPage> {
                 center: Text(
                   dailySteps(),
                   style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 15.0),
+                      fontWeight: FontWeight.bold, fontSize: 15),
                 ),
                 backgroundColor: const Color.fromARGB(255, 130, 205, 71),
                 circularStrokeCap: CircularStrokeCap.butt,
                 progressColor: const Color.fromARGB(255, 68, 27, 183),
               ),
               Row(children: [
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                      MediaQuery.of(context).size.width / 7, 0, 0, 0),
+                SizedBox(
+                  width: (MediaQuery.of(context).size.width / 3),
                   child: Column(
                     children: [
                       Image.asset('Assets/steps.png', width: 20, height: 20),
@@ -174,12 +172,11 @@ class StateStepsPage extends State<StepsPage> {
                     ],
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                      MediaQuery.of(context).size.width / 6, 0, 0, 0),
+                SizedBox(
+                  width: (MediaQuery.of(context).size.width / 3),
                   child: Column(
                     children: [
-                      Image.asset('Assets/time.png', width: 20, height: 20),
+                      Image.asset('Assets/clock.png', width: 20, height: 20),
                       Text(
                           "${(activeTime ~/ 60).toString().padLeft(2, '0')}:${(activeTime % 60).toString().padLeft(2, '0')}",
                           style: const TextStyle(
@@ -188,9 +185,8 @@ class StateStepsPage extends State<StepsPage> {
                     ],
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                      MediaQuery.of(context).size.width / 6, 0, 0, 0),
+                SizedBox(
+                  width: (MediaQuery.of(context).size.width / 3),
                   child: Column(
                     children: [
                       Image.asset('Assets/fire.png', width: 20, height: 20),
@@ -210,14 +206,14 @@ class StateStepsPage extends State<StepsPage> {
                 'Pedestrian status:',
                 style: TextStyle(fontSize: 15),
               ),
-              Icon(
-                _status == 'walking'
-                    ? Icons.directions_walk
-                    : _status == 'stopped'
-                        ? Icons.accessibility_new
-                        : Icons.error,
-                size: 80,
-              ),
+              Image.asset(
+                  _status == 'walking'
+                      ? 'Assets/walking.png'
+                      : _status == 'stopped'
+                          ? 'Assets/standing.png'
+                          : 'Assets/loading_p.gif', // kalitesiz, değiştir
+                  width: 80,
+                  height: 80),
               Center(
                 child: Text(
                   _status,
@@ -239,14 +235,21 @@ class StateStepsPage extends State<StepsPage> {
                                 backgroundColor:
                                     const Color.fromARGB(255, 124, 77, 255),
                                 textStyle: const TextStyle(
-                                    fontSize: 10.0,
+                                    fontSize: 11.0,
                                     fontWeight: FontWeight.bold),
                                 shape: const RoundedRectangleBorder(
                                     borderRadius: BorderRadius.only(
                                   topRight: Radius.circular(0.0),
                                   topLeft: Radius.circular(0.0),
                                 ))),
-                            child: const Text('Home'))),
+                            child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  const Text('Home'),
+                                  Image.asset('Assets/home.png',
+                                      width: 20, height: 20)
+                                ]))),
                     SizedBox(
                         width: (MediaQuery.of(context).size.width / 4),
                         height: 50,
@@ -256,14 +259,21 @@ class StateStepsPage extends State<StepsPage> {
                                 backgroundColor:
                                     const Color.fromARGB(255, 124, 77, 255),
                                 textStyle: const TextStyle(
-                                    fontSize: 10.0,
+                                    fontSize: 11.0,
                                     fontWeight: FontWeight.bold),
                                 shape: const RoundedRectangleBorder(
                                     borderRadius: BorderRadius.only(
                                   topRight: Radius.circular(0.0),
                                   topLeft: Radius.circular(0.0),
                                 ))),
-                            child: const Text('Map'))),
+                            child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  const Text('Map'),
+                                  Image.asset('Assets/map.png',
+                                      width: 20, height: 20)
+                                ]))),
                     SizedBox(
                         width: (MediaQuery.of(context).size.width / 4),
                         height: 50,
@@ -273,31 +283,45 @@ class StateStepsPage extends State<StepsPage> {
                                 backgroundColor:
                                     const Color.fromARGB(255, 124, 77, 255),
                                 textStyle: const TextStyle(
-                                    fontSize: 10.0,
+                                    fontSize: 11.0,
                                     fontWeight: FontWeight.bold),
                                 shape: const RoundedRectangleBorder(
                                     borderRadius: BorderRadius.only(
                                   topRight: Radius.circular(0.0),
                                   topLeft: Radius.circular(0.0),
                                 ))),
-                            child: const Text('Race'))),
+                            child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  const Text('Race'),
+                                  Image.asset('Assets/race.png',
+                                      width: 20, height: 20)
+                                ]))),
                     SizedBox(
-                      width: (MediaQuery.of(context).size.width / 4),
-                      height: 50,
-                      child: ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  const Color.fromARGB(255, 124, 77, 255),
-                              textStyle: const TextStyle(
-                                  fontSize: 10.0, fontWeight: FontWeight.bold),
-                              shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.only(
-                                topRight: Radius.circular(0.0),
-                                topLeft: Radius.circular(0.0),
-                              ))),
-                          child: const Text('Leaderboard')),
-                    ),
+                        width: (MediaQuery.of(context).size.width / 4),
+                        height: 50,
+                        child: ElevatedButton(
+                            onPressed: () {},
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    const Color.fromARGB(255, 124, 77, 255),
+                                textStyle: const TextStyle(
+                                    fontSize: 11.0,
+                                    fontWeight: FontWeight.bold),
+                                shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(0.0),
+                                  topLeft: Radius.circular(0.0),
+                                ))),
+                            child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  const Text('Leaderboard'),
+                                  Image.asset('Assets/leaderboard.png',
+                                      width: 20, height: 20)
+                                ]))),
                   ])
             ],
           ),
