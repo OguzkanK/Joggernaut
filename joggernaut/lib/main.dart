@@ -13,7 +13,7 @@ String formatDate(DateTime d) {
 }
 
 void main() {
-  runApp(MaterialApp(home: MyApp()));
+  runApp(const MaterialApp(home: MyApp(), debugShowCheckedModeBanner: false));
   startForegroundService();
 }
 
@@ -22,12 +22,15 @@ void startForegroundService() async {
 }
 
 class MyApp extends StatefulWidget {
+  const MyApp({super.key});
   @override
   _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
   int previousSteps = 0;
+  int activeTime = 0;
+  int weight = 70;
   late Stream<StepCount> _stepCountStream;
   late Stream<PedestrianStatus> _pedestrianStatusStream;
   String _status = '?', _steps = '0';
@@ -35,7 +38,8 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    Timer.periodic(Duration(seconds: 15), (Timer t) => dayChecker());
+    Timer.periodic(const Duration(seconds: 15), (Timer t) => dayChecker());
+    Timer.periodic(const Duration(seconds: 1), (Timer t) => walkingTime());
     initPlatformState();
   }
 
@@ -46,6 +50,7 @@ class _MyAppState extends State<MyApp> {
     } catch (e) {
       percentage = 0.0;
     }
+    if (percentage > 1.0) percentage = 1.0;
     return percentage;
   }
 
@@ -97,9 +102,15 @@ class _MyAppState extends State<MyApp> {
 
   String goalChecker() {
     int step = 10000 - int.parse(_steps) - previousSteps;
-    return (step > 0)
-        ? "Steps Left: ${step.toString()}"
-        : "You Reached Your Goal!";
+    return (step > 0) ? step.toString() : "You Reached Your Goal!";
+  }
+
+  void walkingTime() {
+    if (_status == "walking") activeTime += 1;
+  }
+
+  double caloriesBurned() {
+    return double.parse(dailySteps()) * 0.04 * weight;
   }
 
   @override
@@ -132,10 +143,47 @@ class _MyAppState extends State<MyApp> {
                 circularStrokeCap: CircularStrokeCap.butt,
                 progressColor: const Color.fromARGB(255, 68, 27, 183),
               ) /*])*/,
-              Text(
-                goalChecker(),
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-              ),
+              Row(children: [
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                      MediaQuery.of(context).size.width / 7, 0, 0, 0),
+                  child: Column(
+                    children: [
+                      Image.asset('Assets/steps.png', width: 20, height: 20),
+                      Text(goalChecker(),
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold)),
+                      const Text('Steps Left', style: TextStyle(fontSize: 12)),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                      MediaQuery.of(context).size.width / 6, 0, 0, 0),
+                  child: Column(
+                    children: [
+                      Image.asset('Assets/time.png', width: 20, height: 20),
+                      Text(activeTime.toString(),
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold)),
+                      const Text('Seconds', style: TextStyle(fontSize: 12)),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                      MediaQuery.of(context).size.width / 6, 0, 0, 0),
+                  child: Column(
+                    children: [
+                      Image.asset('Assets/fire.png', width: 20, height: 20),
+                      Text(caloriesBurned().toInt().toString(),
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold)),
+                      const Text('kcal', style: TextStyle(fontSize: 12)),
+                    ],
+                  ),
+                ),
+              ]),
               const Divider(
                 height: 100,
                 thickness: 1,
@@ -169,50 +217,70 @@ class _MyAppState extends State<MyApp> {
                         width: (MediaQuery.of(context).size.width / 4),
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: () {},
-                          child: const Text('Home'),
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  const Color.fromARGB(255, 124, 77, 255),
-                              textStyle: const TextStyle(
-                                  fontSize: 10.0, fontWeight: FontWeight.bold)),
-                        )),
+                            onPressed: () {},
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    const Color.fromARGB(255, 124, 77, 255),
+                                textStyle: const TextStyle(
+                                    fontSize: 10.0,
+                                    fontWeight: FontWeight.bold),
+                                shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(0.0),
+                                  topLeft: Radius.circular(0.0),
+                                ))),
+                            child: const Text('Home'))),
                     SizedBox(
                         width: (MediaQuery.of(context).size.width / 4),
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: () {},
-                          child: const Text('Map'),
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  const Color.fromARGB(255, 124, 77, 255),
-                              textStyle: const TextStyle(
-                                  fontSize: 10.0, fontWeight: FontWeight.bold)),
-                        )),
+                            onPressed: () {},
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    const Color.fromARGB(255, 124, 77, 255),
+                                textStyle: const TextStyle(
+                                    fontSize: 10.0,
+                                    fontWeight: FontWeight.bold),
+                                shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(0.0),
+                                  topLeft: Radius.circular(0.0),
+                                ))),
+                            child: const Text('Map'))),
                     SizedBox(
                         width: (MediaQuery.of(context).size.width / 4),
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: () {},
-                          child: const Text('Race'),
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  const Color.fromARGB(255, 124, 77, 255),
-                              textStyle: const TextStyle(
-                                  fontSize: 10.0, fontWeight: FontWeight.bold)),
-                        )),
+                            onPressed: () {},
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    const Color.fromARGB(255, 124, 77, 255),
+                                textStyle: const TextStyle(
+                                    fontSize: 10.0,
+                                    fontWeight: FontWeight.bold),
+                                shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(0.0),
+                                  topLeft: Radius.circular(0.0),
+                                ))),
+                            child: const Text('Race'))),
                     SizedBox(
-                        width: (MediaQuery.of(context).size.width / 4),
-                        height: 50,
-                        child: ElevatedButton(
+                      width: (MediaQuery.of(context).size.width / 4),
+                      height: 50,
+                      child: ElevatedButton(
                           onPressed: () {},
-                          child: const Text('Leaderboard'),
                           style: ElevatedButton.styleFrom(
                               backgroundColor:
                                   const Color.fromARGB(255, 124, 77, 255),
                               textStyle: const TextStyle(
-                                  fontSize: 10.0, fontWeight: FontWeight.bold)),
-                        )),
+                                  fontSize: 10.0, fontWeight: FontWeight.bold),
+                              shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(0.0),
+                                topLeft: Radius.circular(0.0),
+                              ))),
+                          child: const Text('Leaderboard')),
+                    ),
                   ])
             ],
           ),
