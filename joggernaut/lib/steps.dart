@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_foreground_service/flutter_foreground_service.dart';
 
 DateTime now = DateTime.now();
+DateTime bufferNow = now; //database?
 DateTime selectedDate = now;
 
 String formatDate(DateTime d) {
@@ -24,9 +25,9 @@ class StepsPage extends StatefulWidget {
 }
 
 class StateStepsPage extends State<StepsPage> {
-  int previousSteps = 0;
-  int activeTime = 0;
-  int weight = 70;
+  int previousSteps = 0; //database
+  int activeTime = 0; //database?
+  int weight = 70; //database
   late Stream<StepCount> _stepCountStream;
   late Stream<PedestrianStatus> _pedestrianStatusStream;
   String _status = 'Loading', _steps = '0';
@@ -87,9 +88,10 @@ class StateStepsPage extends State<StepsPage> {
   }
 
   void dayChecker() {
-    if (DateFormat.Hm().format(DateTime.now()) == "00:00") {
+    if (DateFormat.MMMd().format(bufferNow) != DateFormat.MMMd().format(now)) {
       previousSteps = int.parse(_steps);
       activeTime = 0;
+      bufferNow = now;
     }
   }
 
@@ -103,7 +105,7 @@ class StateStepsPage extends State<StepsPage> {
   }
 
   void walkingTime() {
-    if (_status == "walking") activeTime += 1;
+    if (_status == "walking") ++activeTime;
   }
 
   double caloriesBurned() {
@@ -178,7 +180,7 @@ class StateStepsPage extends State<StepsPage> {
                     children: [
                       Image.asset('Assets/clock.png', width: 20, height: 20),
                       Text(
-                          "${(activeTime ~/ 60).toString().padLeft(2, '0')}:${(activeTime % 60).toString().padLeft(2, '0')}",
+                          "${(activeTime ~/ 60).toString().padLeft(2, '0')}:${(activeTime % 60).toString().padLeft(2, '0')}", // saat ekle
                           style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold)),
                       const Text('Mins', style: TextStyle(fontSize: 12)),
