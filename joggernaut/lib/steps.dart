@@ -93,6 +93,7 @@ class _MyAppState extends State<MyApp> {
   void dayChecker() {
     if (DateFormat.Hm().format(DateTime.now()) == "00:00") {
       previousSteps = int.parse(_steps);
+      activeTime = 0;
     }
   }
 
@@ -110,7 +111,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   double caloriesBurned() {
-    return double.parse(dailySteps()) * 0.04 * weight;
+    return double.parse(dailySteps()) * 0.04;
   }
 
   @override
@@ -163,10 +164,11 @@ class _MyAppState extends State<MyApp> {
                   child: Column(
                     children: [
                       Image.asset('Assets/time.png', width: 20, height: 20),
-                      Text(activeTime.toString(),
+                      Text(
+                          "${(activeTime ~/ 60).toString().padLeft(2, '0')}:${(activeTime % 60).toString().padLeft(2, '0')}",
                           style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold)),
-                      const Text('Seconds', style: TextStyle(fontSize: 12)),
+                      const Text('Mins', style: TextStyle(fontSize: 12)),
                     ],
                   ),
                 ),
