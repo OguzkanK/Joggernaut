@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 
+import 'package:liquid_progress_indicator/liquid_progress_indicator.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:intl/intl.dart';
@@ -9,6 +10,9 @@ import 'package:flutter_foreground_service/flutter_foreground_service.dart';
 DateTime now = DateTime.now();
 DateTime bufferNow = now; //database?
 DateTime selectedDate = now;
+double kcalGoal = 400.0;
+double stepGoal = 10000.0;
+double timeGoal = 7000.0;
 
 String formatDate(DateTime d) {
   return d.toString().substring(0, 19);
@@ -28,6 +32,8 @@ class StateStepsPage extends State<StepsPage> {
   int previousSteps = 0; //database
   int activeTime = 0; //database?
   int weight = 70; //database
+  bool _bStateLeft = false;
+  bool _bStateRight = false;
   late Stream<StepCount> _stepCountStream;
   late Stream<PedestrianStatus> _pedestrianStatusStream;
   String _status = 'Loading', _steps = '0';
@@ -40,10 +46,32 @@ class StateStepsPage extends State<StepsPage> {
     initPlatformState();
   }
 
-  double percentageCal() {
+  double stepGoalPercentage() {
     double percentage;
     try {
-      percentage = double.parse(dailySteps()) / 10000.0;
+      percentage = double.parse(dailySteps()) / stepGoal;
+    } catch (e) {
+      percentage = 0.0;
+    }
+    if (percentage > 1.0) percentage = 1.0;
+    return percentage;
+  }
+
+  double kcalGoalPercentage() {
+    double percentage;
+    try {
+      percentage = caloriesBurned() / kcalGoal;
+    } catch (e) {
+      percentage = 0.0;
+    }
+    if (percentage > 1.0) percentage = 1.0;
+    return percentage;
+  }
+
+  double timeGoalPercentage() {
+    double percentage;
+    try {
+      percentage = activeTime / timeGoal;
     } catch (e) {
       percentage = 0.0;
     }
@@ -100,7 +128,7 @@ class StateStepsPage extends State<StepsPage> {
   }
 
   String goalChecker() {
-    int step = 10000 - int.parse(_steps) - previousSteps;
+    int step = stepGoal.toInt() - int.parse(_steps) - previousSteps;
     return (step > 0) ? step.toString() : "You Reached Your Goal!";
   }
 
@@ -122,7 +150,18 @@ class StateStepsPage extends State<StepsPage> {
           backgroundColor: const Color.fromARGB(255, 124, 77, 255),
         ),
         body: Container(
-          color: const Color.fromARGB(255, 255, 255, 255),
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color.fromARGB(255, 200, 200, 255),
+                Color.fromARGB(255, 255, 255, 255)
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.center,
+            ),
+          ),
+
+          //color: Color.fromARGB(255, 255, 255, 255),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
@@ -148,19 +187,133 @@ class StateStepsPage extends State<StepsPage> {
                       });
                     })
               ]),
-              CircularPercentIndicator(
-                radius: 80.0,
-                lineWidth: 12.0,
-                percent: percentageCal(),
-                center: Text(
-                  dailySteps(),
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 15),
-                ),
-                backgroundColor: const Color.fromARGB(255, 130, 205, 71),
-                circularStrokeCap: CircularStrokeCap.butt,
-                progressColor: const Color.fromARGB(255, 68, 27, 183),
-              ),
+              Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _bStateLeft = !_bStateLeft;
+                        _bStateRight = false;
+                      });
+                    },
+                    child: SizedBox(
+                        width: (MediaQuery.of(context).size.width / 3),
+                        child: _bStateLeft
+                            ? CircularPercentIndicator(
+                                radius: 30.0,
+                                lineWidth: 4.0,
+                                center: const Text("Steps"),
+                                percent: stepGoalPercentage(),
+                                backgroundColor:
+                                    const Color.fromARGB(255, 130, 205, 71),
+                                circularStrokeCap: CircularStrokeCap.butt,
+                                progressColor:
+                                    const Color.fromARGB(255, 124, 77, 255),
+                              )
+                            : CircularPercentIndicator(
+                                radius: 30.0,
+                                lineWidth: 4.0,
+                                center: const Text("Time"),
+                                percent: timeGoalPercentage(),
+                                backgroundColor:
+                                    const Color.fromARGB(255, 130, 205, 71),
+                                circularStrokeCap: CircularStrokeCap.butt,
+                                progressColor:
+                                    const Color.fromARGB(255, 124, 77, 255)))),
+                Center(
+                    child: SizedBox(
+                        width: (MediaQuery.of(context).size.width / 3),
+                        child: _bStateLeft
+                            ? SizedBox(
+                                width: 140.0,
+                                height: 140.0,
+                                child: LiquidCircularProgressIndicator(
+                                    value: timeGoalPercentage(),
+                                    center: Text(
+                                      "${(activeTime ~/ 60).toString().padLeft(2, '0')}:${(activeTime % 60).toString().padLeft(2, '0')}",
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15),
+                                    ),
+                                    borderColor:
+                                        const Color.fromARGB(255, 130, 205, 71),
+                                    borderWidth: 5.0,
+                                    backgroundColor:
+                                        const Color.fromARGB(0, 0, 0, 0),
+                                    direction: Axis.vertical,
+                                    valueColor: const AlwaysStoppedAnimation(
+                                        Color.fromARGB(255, 124, 77, 255))))
+                            : _bStateRight
+                                ? SizedBox(
+                                    width: 140.0,
+                                    height: 140.0,
+                                    child: LiquidCircularProgressIndicator(
+                                        value: kcalGoalPercentage(),
+                                        center: Text(
+                                          caloriesBurned().toString(),
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 15),
+                                        ),
+                                        borderColor: const Color.fromARGB(
+                                            255, 130, 205, 71),
+                                        borderWidth: 5.0,
+                                        backgroundColor:
+                                            const Color.fromARGB(0, 0, 0, 0),
+                                        direction: Axis.vertical,
+                                        valueColor: const AlwaysStoppedAnimation(
+                                            Color.fromARGB(255, 124, 77, 255))))
+                                : SizedBox(
+                                    width: 140.0,
+                                    height: 140.0,
+                                    child: LiquidCircularProgressIndicator(
+                                        value: stepGoalPercentage(),
+                                        center: Text(
+                                          dailySteps(),
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 15),
+                                        ),
+                                        backgroundColor:
+                                            const Color.fromARGB(0, 0, 0, 0),
+                                        borderColor: const Color.fromARGB(
+                                            255, 130, 205, 71),
+                                        borderWidth: 5.0,
+                                        direction: Axis.vertical,
+                                        valueColor: const AlwaysStoppedAnimation(
+                                            Color.fromARGB(255, 124, 77, 255)))))),
+                GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () {
+                      setState(() {
+                        _bStateRight = !_bStateRight;
+                        _bStateLeft = false;
+                      });
+                    },
+                    child: SizedBox(
+                        width: (MediaQuery.of(context).size.width / 3),
+                        child: _bStateRight
+                            ? CircularPercentIndicator(
+                                radius: 30.0,
+                                lineWidth: 4.0,
+                                center: const Text("Steps"),
+                                percent: stepGoalPercentage(),
+                                backgroundColor:
+                                    const Color.fromARGB(255, 130, 205, 71),
+                                circularStrokeCap: CircularStrokeCap.butt,
+                                progressColor:
+                                    const Color.fromARGB(255, 124, 77, 255),
+                              )
+                            : CircularPercentIndicator(
+                                radius: 30.0,
+                                lineWidth: 4.0,
+                                center: const Text("Kcal"),
+                                percent: kcalGoalPercentage(),
+                                backgroundColor:
+                                    const Color.fromARGB(255, 130, 205, 71),
+                                circularStrokeCap: CircularStrokeCap.butt,
+                                progressColor:
+                                    const Color.fromARGB(255, 124, 77, 255))))
+              ]),
               Row(children: [
                 SizedBox(
                   width: (MediaQuery.of(context).size.width / 3),
