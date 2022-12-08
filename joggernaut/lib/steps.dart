@@ -13,28 +13,23 @@ String formatDate(DateTime d) {
   return d.toString().substring(0, 19);
 }
 
-void main() {
-  runApp(const MaterialApp(home: MyApp(), debugShowCheckedModeBanner: false));
-  startForegroundService();
-}
-
 void startForegroundService() async {
   ForegroundService().start();
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class StepsPage extends StatefulWidget {
+  const StepsPage({super.key});
   @override
-  _MyAppState createState() => _MyAppState();
+  StateStepsPage createState() => StateStepsPage();
 }
 
-class _MyAppState extends State<MyApp> {
+class StateStepsPage extends State<StepsPage> {
   int previousSteps = 0;
   int activeTime = 0;
   int weight = 70;
   late Stream<StepCount> _stepCountStream;
   late Stream<PedestrianStatus> _pedestrianStatusStream;
-  String _status = 'Loading', _steps = '0';
+  String _status = 'Not Available', _steps = '0';
 
   @override
   void initState() {
@@ -69,7 +64,7 @@ class _MyAppState extends State<MyApp> {
 
   void onPedestrianStatusError(error) {
     setState(() {
-      _status = 'Pedestrian Status not available';
+      _status = 'Not Available';
     });
   }
 
