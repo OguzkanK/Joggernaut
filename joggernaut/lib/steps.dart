@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:liquid_progress_indicator/liquid_progress_indicator.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -8,11 +9,11 @@ import 'package:intl/intl.dart';
 import 'package:flutter_foreground_service/flutter_foreground_service.dart';
 
 DateTime now = DateTime.now();
-DateTime bufferNow = now; //database?
 DateTime selectedDate = now;
 double kcalGoal = 400.0;
 double stepGoal = 10000.0;
 double timeGoal = 7000.0;
+String bufferNow = "";
 
 String formatDate(DateTime d) {
   return d.toString().substring(0, 19);
@@ -28,7 +29,7 @@ class StepsPage extends StatefulWidget {
   StateStepsPage createState() => StateStepsPage();
 }
 
-class StateStepsPage extends State<StepsPage> {
+class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   int previousSteps = 0; //database
   int activeTime = 0; //database?
   int weight = 70; //database
@@ -43,7 +44,16 @@ class StateStepsPage extends State<StepsPage> {
     super.initState();
     Timer.periodic(const Duration(seconds: 15), (Timer t) => dayChecker());
     Timer.periodic(const Duration(seconds: 1), (Timer t) => walkingTime());
+    retrieveDate();
+    WidgetsBinding.instance.addObserver(this);
     initPlatformState();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      saveValue();
+    }
   }
 
   double stepGoalPercentage() {
@@ -116,10 +126,10 @@ class StateStepsPage extends State<StepsPage> {
   }
 
   void dayChecker() {
-    if (DateFormat.MMMd().format(bufferNow) != DateFormat.MMMd().format(now)) {
-      previousSteps = int.parse(_steps);
+    if (bufferNow != DateFormat.MMMd().format(now)) {
+      saveStep();
       activeTime = 0;
-      bufferNow = now;
+      bufferNow = DateFormat.MMMd().format(now);
     }
   }
 
@@ -137,7 +147,28 @@ class StateStepsPage extends State<StepsPage> {
   }
 
   double caloriesBurned() {
-    return double.parse(dailySteps()) * 0.04;
+    return double.parse(dailySteps()) * 0.04 * (weight / 75);
+  }
+
+  Future<void> saveValue() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString('bufferNow', DateFormat.MMMd().format(now));
+    await prefs.setInt('activeTime', activeTime);
+  }
+
+  Future<void> saveStep() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setInt("previousSteps", int.parse(_steps));
+  }
+
+  Future<void> retrieveDate() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    bufferNow = prefs.getString('bufferNow') ?? DateFormat.MMMd().format(now);
+    activeTime = prefs.getInt('activeTime') ?? 0;
+    previousSteps = prefs.getInt('previousSteps') ?? 0;
   }
 
   @override
@@ -249,7 +280,7 @@ class StateStepsPage extends State<StepsPage> {
                                     child: LiquidCircularProgressIndicator(
                                         value: kcalGoalPercentage(),
                                         center: Text(
-                                          caloriesBurned().toString(),
+                                          caloriesBurned().toInt().toString(),
                                           style: const TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 15),
