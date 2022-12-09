@@ -208,6 +208,8 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
     previousSteps = prefs.getInt('previousSteps') ?? 0;
   }
 
+  final globalKey = GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([
@@ -217,10 +219,76 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
+        key: globalKey,
+        drawer: Drawer(
+            child: Column(children: [
+          // Add a top section with a title and a button
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Dashboard',
+                  style: Theme.of(context).textTheme.headline5,
+                )
+              ],
+            ),
+          ),
+          // Add a grid of cards showing items
+          Expanded(
+              child: GridView.count(crossAxisCount: 1, children: [
+            Card(
+                child: InkWell(
+              onTap: () {
+                // Function is executed on tap.
+              },
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.widgets),
+                  Text('Item 1'),
+                ],
+              ),
+            )),
+            Card(
+                child: InkWell(
+              onTap: () {
+                // Function is executed on tap.
+              },
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.widgets),
+                  Text('Item 2'),
+                ],
+              ),
+            )),
+            Card(
+                child: InkWell(
+              onTap: () {
+                // Function is executed on tap.
+              },
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.widgets),
+                  Text('Item 3'),
+                ],
+              ),
+            )),
+            // Add more cards here
+          ]))
+        ])),
         appBar: AppBar(
-          title: const Text('    Joggernaut'),
-          backgroundColor: const Color.fromARGB(255, 124, 77, 255),
-        ),
+            title: const Text('Joggernaut'),
+            backgroundColor: const Color.fromARGB(255, 124, 77, 255),
+            leading: IconButton(
+              icon: const Icon(Icons.density_medium),
+              onPressed: () {
+                globalKey.currentState!.openDrawer();
+              },
+            )),
         body: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
