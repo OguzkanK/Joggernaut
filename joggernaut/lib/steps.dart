@@ -11,10 +11,6 @@ import 'package:flutter_foreground_service/flutter_foreground_service.dart';
 
 DateTime now = DateTime.now();
 DateTime selectedDate = now;
-double kcalGoal = 400.0;
-double stepGoal = 10000.0;
-double timeGoal = 7000.0;
-String bufferNow = "";
 
 String formatDate(DateTime d) {
   return d.toString().substring(0, 19);
@@ -70,19 +66,30 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   int previousSteps = 0; //database
   int activeTime = 0; //database?
   int weight = 70; //database
+
   bool _bStateLeft = false;
   bool _bStateRight = false;
+
+  double kcalGoal = 400.0;
+  double stepGoal = 10000.0;
+  double timeGoal = 7000.0;
+
   late Stream<StepCount> _stepCountStream;
   late Stream<PedestrianStatus> _pedestrianStatusStream;
-  String _status = 'Loading', _steps = '0';
+
+  String _status = 'Loading';
+  String _steps = '0';
+  String bufferNow = "";
 
   @override
   void initState() {
     super.initState();
+
     Timer.periodic(const Duration(seconds: 15), (Timer t) => dayChecker());
     Timer.periodic(const Duration(seconds: 1), (Timer t) => walkingTime());
-    retrieveDate();
+
     WidgetsBinding.instance.addObserver(this);
+    retrieveDate();
     initPlatformState();
   }
 
@@ -93,37 +100,22 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
     }
   }
 
-  double stepGoalPercentage() {
-    double percentage;
-    try {
-      percentage = double.parse(dailySteps()) / stepGoal;
-    } catch (e) {
-      percentage = 0.0;
-    }
+  double goalPercentage(double goal, double progress) {
+    double percentage = progress / goal;
     if (percentage > 1.0) percentage = 1.0;
     return percentage;
+  }
+
+  double stepGoalPercentage() {
+    return goalPercentage(stepGoal, double.parse(dailySteps()));
   }
 
   double kcalGoalPercentage() {
-    double percentage;
-    try {
-      percentage = caloriesBurned() / kcalGoal;
-    } catch (e) {
-      percentage = 0.0;
-    }
-    if (percentage > 1.0) percentage = 1.0;
-    return percentage;
+    return goalPercentage(kcalGoal, caloriesBurned());
   }
 
   double timeGoalPercentage() {
-    double percentage;
-    try {
-      percentage = activeTime / timeGoal;
-    } catch (e) {
-      percentage = 0.0;
-    }
-    if (percentage > 1.0) percentage = 1.0;
-    return percentage;
+    return goalPercentage(timeGoal, activeTime.toDouble());
   }
 
   void onStepCount(StepCount event) {
@@ -206,6 +198,21 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
     bufferNow = prefs.getString('bufferNow') ?? DateFormat.MMMd().format(now);
     activeTime = prefs.getInt('activeTime') ?? 0;
     previousSteps = prefs.getInt('previousSteps') ?? 0;
+  }
+
+  SizedBox activityBox(Image icon, String value, String label) {
+    return SizedBox(
+      width: (MediaQuery.of(context).size.width / 3),
+      child: Column(
+        children: [
+          icon,
+          Text(value,
+              style:
+                  const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Text(label, style: const TextStyle(fontSize: 12)),
+        ],
+      ),
+    );
   }
 
   final globalKey = GlobalKey<ScaffoldState>();
@@ -390,43 +397,18 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                         )))
               ]),
               Row(children: [
-                SizedBox(
-                  width: (MediaQuery.of(context).size.width / 3),
-                  child: Column(
-                    children: [
-                      Image.asset('Assets/steps.png', width: 20, height: 20),
-                      Text(goalChecker(),
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
-                      const Text('Steps Left', style: TextStyle(fontSize: 12)),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  width: (MediaQuery.of(context).size.width / 3),
-                  child: Column(
-                    children: [
-                      Image.asset('Assets/clock.png', width: 20, height: 20),
-                      Text(
-                          "${(activeTime ~/ 3600).toString().padLeft(2, '0')}:${((activeTime % 3600) ~/ 60).toString().padLeft(2, '0')}",
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
-                      const Text('Hours', style: TextStyle(fontSize: 12)),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  width: (MediaQuery.of(context).size.width / 3),
-                  child: Column(
-                    children: [
-                      Image.asset('Assets/fire.png', width: 20, height: 20),
-                      Text(caloriesBurned().toInt().toString(),
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
-                      const Text('kcal', style: TextStyle(fontSize: 12)),
-                    ],
-                  ),
-                ),
+                activityBox(
+                    Image.asset('Assets/steps.png', width: 20, height: 20),
+                    goalChecker(),
+                    'Steps Left'),
+                activityBox(
+                    Image.asset('Assets/clock.png', width: 20, height: 20),
+                    "${(activeTime ~/ 3600).toString().padLeft(2, '0')}:${((activeTime % 3600) ~/ 60).toString().padLeft(2, '0')}",
+                    'Hours'),
+                activityBox(
+                    Image.asset('Assets/fire.png', width: 20, height: 20),
+                    caloriesBurned().toInt().toString(),
+                    'kcal'),
               ]),
               const Divider(
                 thickness: 1,
