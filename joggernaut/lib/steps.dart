@@ -220,66 +220,6 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         key: globalKey,
-        drawer: Drawer(
-            child: Column(children: [
-          // Add a top section with a title and a button
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Dashboard',
-                  style: Theme.of(context).textTheme.headline5,
-                )
-              ],
-            ),
-          ),
-          // Add a grid of cards showing items
-          Expanded(
-              child: GridView.count(crossAxisCount: 1, children: [
-            Card(
-                child: InkWell(
-              onTap: () {
-                // Function is executed on tap.
-              },
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.widgets),
-                  Text('Item 1'),
-                ],
-              ),
-            )),
-            Card(
-                child: InkWell(
-              onTap: () {
-                // Function is executed on tap.
-              },
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.widgets),
-                  Text('Item 2'),
-                ],
-              ),
-            )),
-            Card(
-                child: InkWell(
-              onTap: () {
-                // Function is executed on tap.
-              },
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.widgets),
-                  Text('Item 3'),
-                ],
-              ),
-            )),
-            // Add more cards here
-          ]))
-        ])),
         appBar: AppBar(
             title: const Text('Joggernaut'),
             backgroundColor: const Color.fromARGB(255, 124, 77, 255),
@@ -289,6 +229,28 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                 globalKey.currentState!.openDrawer();
               },
             )),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              SizedBox(
+                  height: AppBar().preferredSize.height + kToolbarHeight,
+                  child: const DrawerHeader(
+                    decoration:
+                        BoxDecoration(color: Color.fromARGB(255, 124, 77, 255)),
+                    child: Text('Dashboard'),
+                  )),
+              ListTile(
+                title: const Text('Item 1'),
+                onTap: () {},
+              ),
+              ListTile(
+                title: const Text('Item 2'),
+                onTap: () {},
+              ),
+            ],
+          ),
+        ),
         body: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
