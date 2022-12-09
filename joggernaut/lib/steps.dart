@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:flutter/services.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:liquid_progress_indicator/liquid_progress_indicator.dart';
@@ -21,6 +22,42 @@ String formatDate(DateTime d) {
 
 void startForegroundService() async {
   ForegroundService().start();
+}
+
+class NavigationButton extends StatelessWidget {
+  final String text;
+  final String image;
+  final void Function()? onPressed;
+
+  const NavigationButton({
+    required Key key,
+    required this.text,
+    required this.image,
+    required this.onPressed,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: (MediaQuery.of(context).size.width / 4),
+      height: 50,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+            backgroundColor: const Color.fromARGB(255, 124, 77, 255),
+            textStyle:
+                const TextStyle(fontSize: 11.0, fontWeight: FontWeight.bold),
+            shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+              topRight: Radius.circular(0.0),
+              topLeft: Radius.circular(0.0),
+            ))),
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [Text(text), Image.asset(image, width: 20, height: 20)]),
+      ),
+    );
+  }
 }
 
 class StepsPage extends StatefulWidget {
@@ -173,6 +210,10 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -191,8 +232,6 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
               end: Alignment.center,
             ),
           ),
-
-          //color: Color.fromARGB(255, 255, 255, 255),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
@@ -228,90 +267,71 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                     },
                     child: SizedBox(
                         width: (MediaQuery.of(context).size.width / 3),
-                        child: _bStateLeft
-                            ? CircularPercentIndicator(
-                                radius: 30.0,
-                                lineWidth: 4.0,
-                                center: const Text("Steps"),
-                                percent: stepGoalPercentage(),
-                                backgroundColor:
-                                    const Color.fromARGB(255, 130, 205, 71),
-                                circularStrokeCap: CircularStrokeCap.butt,
-                                progressColor:
-                                    const Color.fromARGB(255, 124, 77, 255),
-                              )
-                            : CircularPercentIndicator(
-                                radius: 30.0,
-                                lineWidth: 4.0,
-                                center: const Text("Time"),
-                                percent: timeGoalPercentage(),
-                                backgroundColor:
-                                    const Color.fromARGB(255, 130, 205, 71),
-                                circularStrokeCap: CircularStrokeCap.butt,
-                                progressColor:
-                                    const Color.fromARGB(255, 124, 77, 255)))),
+                        child: CircularPercentIndicator(
+                          radius: 30.0,
+                          lineWidth: 4.0,
+                          center: _bStateLeft
+                              ? const Text("Steps")
+                              : const Text("Time"),
+                          percent: _bStateLeft
+                              ? stepGoalPercentage()
+                              : timeGoalPercentage(),
+                          backgroundColor: _bStateLeft
+                              ? const Color.fromARGB(255, 130, 205, 71)
+                              : const Color.fromARGB(255, 71, 71, 205),
+                          circularStrokeCap: CircularStrokeCap.butt,
+                          progressColor:
+                              const Color.fromARGB(255, 124, 77, 255),
+                        ))),
                 Center(
                     child: SizedBox(
                         width: (MediaQuery.of(context).size.width / 3),
-                        child: _bStateLeft
-                            ? SizedBox(
+                        child: Center(
+                            child: SizedBox(
                                 width: 140.0,
                                 height: 140.0,
                                 child: LiquidCircularProgressIndicator(
-                                    value: timeGoalPercentage(),
-                                    center: Text(
-                                      "${(activeTime ~/ 60).toString().padLeft(2, '0')}:${(activeTime % 60).toString().padLeft(2, '0')}",
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 15),
-                                    ),
-                                    borderColor:
-                                        const Color.fromARGB(255, 130, 205, 71),
-                                    borderWidth: 5.0,
-                                    backgroundColor:
-                                        const Color.fromARGB(0, 0, 0, 0),
-                                    direction: Axis.vertical,
-                                    valueColor: const AlwaysStoppedAnimation(
-                                        Color.fromARGB(255, 124, 77, 255))))
-                            : _bStateRight
-                                ? SizedBox(
-                                    width: 140.0,
-                                    height: 140.0,
-                                    child: LiquidCircularProgressIndicator(
-                                        value: kcalGoalPercentage(),
-                                        center: Text(
-                                          caloriesBurned().toInt().toString(),
+                                  value: _bStateLeft
+                                      ? timeGoalPercentage()
+                                      : _bStateRight
+                                          ? kcalGoalPercentage()
+                                          : stepGoalPercentage(),
+                                  center: _bStateLeft
+                                      ? Text(
+                                          "${(activeTime ~/ 3600).toString().padLeft(2, '0')}:${((activeTime % 3600) ~/ 60).toString().padLeft(2, '0')}",
                                           style: const TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 15),
-                                        ),
-                                        borderColor: const Color.fromARGB(
-                                            255, 130, 205, 71),
-                                        borderWidth: 5.0,
-                                        backgroundColor:
-                                            const Color.fromARGB(0, 0, 0, 0),
-                                        direction: Axis.vertical,
-                                        valueColor: const AlwaysStoppedAnimation(
-                                            Color.fromARGB(255, 124, 77, 255))))
-                                : SizedBox(
-                                    width: 140.0,
-                                    height: 140.0,
-                                    child: LiquidCircularProgressIndicator(
-                                        value: stepGoalPercentage(),
-                                        center: Text(
-                                          dailySteps(),
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 15),
-                                        ),
-                                        backgroundColor:
-                                            const Color.fromARGB(0, 0, 0, 0),
-                                        borderColor: const Color.fromARGB(
-                                            255, 130, 205, 71),
-                                        borderWidth: 5.0,
-                                        direction: Axis.vertical,
-                                        valueColor: const AlwaysStoppedAnimation(
-                                            Color.fromARGB(255, 124, 77, 255)))))),
+                                        )
+                                      : _bStateRight
+                                          ? Text(
+                                              caloriesBurned()
+                                                  .toInt()
+                                                  .toString(),
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 15),
+                                            )
+                                          : Text(
+                                              dailySteps(),
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 15),
+                                            ),
+                                  borderColor: _bStateLeft
+                                      ? const Color.fromARGB(255, 71, 71, 205)
+                                      : _bStateRight
+                                          ? const Color.fromARGB(
+                                              255, 205, 71, 71)
+                                          : const Color.fromARGB(
+                                              255, 130, 205, 71),
+                                  borderWidth: 5.0,
+                                  backgroundColor:
+                                      const Color.fromARGB(0, 0, 0, 0),
+                                  direction: Axis.vertical,
+                                  valueColor: const AlwaysStoppedAnimation(
+                                      Color.fromARGB(255, 124, 77, 255)),
+                                ))))),
                 GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onTap: () {
@@ -322,28 +342,22 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                     },
                     child: SizedBox(
                         width: (MediaQuery.of(context).size.width / 3),
-                        child: _bStateRight
-                            ? CircularPercentIndicator(
-                                radius: 30.0,
-                                lineWidth: 4.0,
-                                center: const Text("Steps"),
-                                percent: stepGoalPercentage(),
-                                backgroundColor:
-                                    const Color.fromARGB(255, 130, 205, 71),
-                                circularStrokeCap: CircularStrokeCap.butt,
-                                progressColor:
-                                    const Color.fromARGB(255, 124, 77, 255),
-                              )
-                            : CircularPercentIndicator(
-                                radius: 30.0,
-                                lineWidth: 4.0,
-                                center: const Text("Kcal"),
-                                percent: kcalGoalPercentage(),
-                                backgroundColor:
-                                    const Color.fromARGB(255, 130, 205, 71),
-                                circularStrokeCap: CircularStrokeCap.butt,
-                                progressColor:
-                                    const Color.fromARGB(255, 124, 77, 255))))
+                        child: CircularPercentIndicator(
+                          radius: 30.0,
+                          lineWidth: 4.0,
+                          center: _bStateRight
+                              ? const Text("Steps")
+                              : const Text("Kcal"),
+                          percent: _bStateRight
+                              ? stepGoalPercentage()
+                              : kcalGoalPercentage(),
+                          backgroundColor: _bStateRight
+                              ? const Color.fromARGB(255, 130, 205, 71)
+                              : const Color.fromARGB(255, 205, 71, 71),
+                          circularStrokeCap: CircularStrokeCap.butt,
+                          progressColor:
+                              const Color.fromARGB(255, 124, 77, 255),
+                        )))
               ]),
               Row(children: [
                 SizedBox(
@@ -364,10 +378,10 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                     children: [
                       Image.asset('Assets/clock.png', width: 20, height: 20),
                       Text(
-                          "${(activeTime ~/ 60).toString().padLeft(2, '0')}:${(activeTime % 60).toString().padLeft(2, '0')}", // saat ekle
+                          "${(activeTime ~/ 3600).toString().padLeft(2, '0')}:${((activeTime % 3600) ~/ 60).toString().padLeft(2, '0')}",
                           style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold)),
-                      const Text('Mins', style: TextStyle(fontSize: 12)),
+                      const Text('Hours', style: TextStyle(fontSize: 12)),
                     ],
                   ),
                 ),
@@ -409,106 +423,35 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                 ),
               ),
               Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    SizedBox(
-                        width: (MediaQuery.of(context).size.width / 4),
-                        height: 50,
-                        child: ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    const Color.fromARGB(255, 124, 77, 255),
-                                textStyle: const TextStyle(
-                                    fontSize: 11.0,
-                                    fontWeight: FontWeight.bold),
-                                shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(0.0),
-                                  topLeft: Radius.circular(0.0),
-                                ))),
-                            child: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  const Text('Home'),
-                                  Image.asset('Assets/home.png',
-                                      width: 20, height: 20)
-                                ]))),
-                    SizedBox(
-                        width: (MediaQuery.of(context).size.width / 4),
-                        height: 50,
-                        child: ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    const Color.fromARGB(255, 124, 77, 255),
-                                textStyle: const TextStyle(
-                                    fontSize: 11.0,
-                                    fontWeight: FontWeight.bold),
-                                shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(0.0),
-                                  topLeft: Radius.circular(0.0),
-                                ))),
-                            child: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  const Text('Map'),
-                                  Image.asset('Assets/map.png',
-                                      width: 20, height: 20)
-                                ]))),
-                    SizedBox(
-                        width: (MediaQuery.of(context).size.width / 4),
-                        height: 50,
-                        child: ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    const Color.fromARGB(255, 124, 77, 255),
-                                textStyle: const TextStyle(
-                                    fontSize: 11.0,
-                                    fontWeight: FontWeight.bold),
-                                shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(0.0),
-                                  topLeft: Radius.circular(0.0),
-                                ))),
-                            child: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  const Text('Race'),
-                                  Image.asset('Assets/race.png',
-                                      width: 20, height: 20)
-                                ]))),
-                    SizedBox(
-                        width: (MediaQuery.of(context).size.width / 4),
-                        height: 50,
-                        child: ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    const Color.fromARGB(255, 124, 77, 255),
-                                textStyle: const TextStyle(
-                                    fontSize: 11.0,
-                                    fontWeight: FontWeight.bold),
-                                shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(0.0),
-                                  topLeft: Radius.circular(0.0),
-                                ))),
-                            child: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  const Text('Leaderboard'),
-                                  Image.asset('Assets/leaderboard.png',
-                                      width: 20, height: 20)
-                                ]))),
-                  ])
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  NavigationButton(
+                    key: const Key('HomeButton'),
+                    text: 'Home',
+                    image: 'Assets/home.png',
+                    onPressed: () {},
+                  ),
+                  NavigationButton(
+                    key: const Key('MapButton'),
+                    text: 'Map',
+                    image: 'Assets/map.png',
+                    onPressed: () {},
+                  ),
+                  NavigationButton(
+                    key: const Key('RaceButton'),
+                    text: 'Race',
+                    image: 'Assets/race.png',
+                    onPressed: () {},
+                  ),
+                  NavigationButton(
+                    key: const Key('LeaderboardButton'),
+                    text: 'Leaderboard',
+                    image: 'Assets/leaderboard.png',
+                    onPressed: () {},
+                  )
+                ],
+              )
             ],
           ),
         ),
