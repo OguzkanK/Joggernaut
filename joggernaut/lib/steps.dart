@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 
+//import 'package:liquid_progress_indicator/liquid_progress_indicator.dart';
+
+import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:liquid_progress_indicator/liquid_progress_indicator.dart';
 import 'package:pedometer/pedometer.dart';
-import 'package:percent_indicator/percent_indicator.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_foreground_service/flutter_foreground_service.dart';
 
 DateTime now = DateTime.now();
 DateTime selectedDate = now;
+//const double pi = 3.1415926535897932;
 
 String formatDate(DateTime d) {
   return d.toString().substring(0, 19);
@@ -68,6 +70,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   int weight = 70; //database
 
   bool _bStateLeft = false;
+  bool _bStateCenter = false;
   bool _bStateRight = false;
 
   double kcalGoal = 400.0;
@@ -90,6 +93,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
 
     WidgetsBinding.instance.addObserver(this);
     retrieveDate();
+
     initPlatformState();
   }
 
@@ -157,6 +161,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   void dayChecker() {
     if (bufferNow != DateFormat.MMMd().format(now)) {
       saveStep();
+      previousSteps = int.parse(_steps);
       activeTime = 0;
       bufferNow = DateFormat.MMMd().format(now);
     }
@@ -168,7 +173,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
 
   String goalChecker() {
     int step = stepGoal.toInt() - int.parse(_steps) - previousSteps;
-    return (step > 0) ? step.toString() : "You Reached Your Goal!";
+    return (step < 0) ? step.toString() : "0";
   }
 
   void walkingTime() {
@@ -208,11 +213,58 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
           icon,
           Text(value,
               style:
-                  const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          Text(label, style: const TextStyle(fontSize: 12)),
+                  const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+          Text(label, style: const TextStyle(fontSize: 14)),
         ],
       ),
     );
+  }
+
+  SizedBox circularGoal(
+      double percentage, double size, String icon, String value, String label) {
+    return SizedBox(
+        height: size,
+        width: size,
+        child: SfRadialGauge(
+            enableLoadingAnimation: true,
+            animationDuration: 1000,
+            axes: <RadialAxis>[
+              RadialAxis(
+                  //startAngle: 270, çember
+                  //endAngle: 270,
+                  annotations: <GaugeAnnotation>[
+                    GaugeAnnotation(
+                        widget: SizedBox(
+                            height: 75, //pixel tasmasi
+                            width: 75,
+                            child: activityBox(
+                                Image.asset(icon, width: 29, height: 29),
+                                value,
+                                label)))
+                  ],
+                  showLabels: false,
+                  showTicks: false,
+                  axisLineStyle: const AxisLineStyle(
+                    color: Color.fromARGB(100, 100, 100, 100),
+                    thickness: 0.06,
+                    thicknessUnit: GaugeSizeUnit.factor,
+                  ),
+                  pointers: <GaugePointer>[
+                    RangePointer(
+                      cornerStyle: CornerStyle.bothCurve,
+                      value: percentage * 100,
+                      width: 0.10,
+                      sizeUnit: GaugeSizeUnit.factor,
+                      gradient: const SweepGradient(colors: <Color>[
+                        Color.fromARGB(255, 55, 20, 141),
+                        Color.fromARGB(255, 136, 93, 255)
+                      ], stops: <double>[
+                        0.25,
+                        0.75
+                      ]),
+                    )
+                  ]),
+            ]));
   }
 
   final globalKey = GlobalKey<ScaffoldState>();
@@ -272,7 +324,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              const SizedBox(),
+              //const SizedBox(),
               Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
                 TextButton(
                     child: const Text("<"),
@@ -294,121 +346,109 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                       });
                     })
               ]),
+              //iç içe su
+
+              // Stack(
+              //   children: [
+              //     Transform(
+              //         alignment: Alignment.center,
+              //         transform: Matrix4.rotationY(pi * 4),
+              //         child: SizedBox(
+              //             height: 100,
+              //             width: 100,
+              //             child: LiquidCircularProgressIndicator(
+              //               value: 0.75,
+              //               valueColor: AlwaysStoppedAnimation(
+              //                   Color.fromARGB(255, 20, 153, 62)),
+              //               backgroundColor: Color.fromARGB(0, 251, 251, 251),
+              //             ))),
+              //     SizedBox(
+              //         height: 100,
+              //         width: 100,
+              //         child: LiquidCircularProgressIndicator(
+              //           value: 0.75,
+              //           valueColor: AlwaysStoppedAnimation(Colors.green),
+              //           backgroundColor: Color.fromARGB(0, 244, 4, 4),
+              //         )),
+              //   ],
+              // ),
+              _bStateLeft
+                  ? circularGoal(
+                      timeGoalPercentage(),
+                      200.0,
+                      'Assets/clock.png',
+                      "${(activeTime ~/ 3600).toString().padLeft(2, '0')}:${((activeTime % 3600) ~/ 60).toString().padLeft(2, '0')}",
+                      'Hour')
+                  : _bStateCenter
+                      ? circularGoal(
+                          kcalGoalPercentage(),
+                          200.0,
+                          'Assets/fire.png',
+                          caloriesBurned().toInt().toString(),
+                          'Kcal')
+                      : _bStateRight
+                          ? circularGoal(
+                              0.4, 200.0, 'Assets/steps.png', "40", 'label')
+                          : circularGoal(stepGoalPercentage(), 200.0,
+                              'Assets/steps.png', dailySteps(), 'Steps'),
               Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
                 GestureDetector(
-                    onTap: () {
+                    behavior: HitTestBehavior.translucent,
+                    onLongPress: () {
                       setState(() {
                         _bStateLeft = !_bStateLeft;
                         _bStateRight = false;
+                        _bStateCenter = false;
                       });
                     },
                     child: SizedBox(
                         width: (MediaQuery.of(context).size.width / 3),
-                        child: CircularPercentIndicator(
-                          radius: 30.0,
-                          lineWidth: 4.0,
-                          center: _bStateLeft
-                              ? const Text("Steps")
-                              : const Text("Time"),
-                          percent: _bStateLeft
-                              ? stepGoalPercentage()
-                              : timeGoalPercentage(),
-                          backgroundColor: _bStateLeft
-                              ? const Color.fromARGB(255, 130, 205, 71)
-                              : const Color.fromARGB(255, 71, 71, 205),
-                          circularStrokeCap: CircularStrokeCap.butt,
-                          progressColor:
-                              const Color.fromARGB(255, 124, 77, 255),
-                        ))),
-                Center(
-                    child: SizedBox(
-                        width: (MediaQuery.of(context).size.width / 3),
-                        child: Center(
-                            child: SizedBox(
-                                width: 140.0,
-                                height: 140.0,
-                                child: LiquidCircularProgressIndicator(
-                                  value: _bStateLeft
-                                      ? timeGoalPercentage()
-                                      : _bStateRight
-                                          ? kcalGoalPercentage()
-                                          : stepGoalPercentage(),
-                                  center: _bStateLeft
-                                      ? Text(
-                                          "${(activeTime ~/ 3600).toString().padLeft(2, '0')}:${((activeTime % 3600) ~/ 60).toString().padLeft(2, '0')}",
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 15),
-                                        )
-                                      : _bStateRight
-                                          ? Text(
-                                              caloriesBurned()
-                                                  .toInt()
-                                                  .toString(),
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 15),
-                                            )
-                                          : Text(
-                                              dailySteps(),
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 15),
-                                            ),
-                                  borderColor: _bStateLeft
-                                      ? const Color.fromARGB(255, 71, 71, 205)
-                                      : _bStateRight
-                                          ? const Color.fromARGB(
-                                              255, 205, 71, 71)
-                                          : const Color.fromARGB(
-                                              255, 130, 205, 71),
-                                  borderWidth: 5.0,
-                                  backgroundColor:
-                                      const Color.fromARGB(0, 0, 0, 0),
-                                  direction: Axis.vertical,
-                                  valueColor: const AlwaysStoppedAnimation(
-                                      Color.fromARGB(255, 124, 77, 255)),
-                                ))))),
+                        height: 100,
+                        child: _bStateLeft
+                            ? circularGoal(stepGoalPercentage(), 100.0,
+                                'Assets/steps.png', dailySteps(), 'Steps')
+                            : circularGoal(
+                                timeGoalPercentage(),
+                                100.0,
+                                "Assets/clock.png",
+                                "${(activeTime ~/ 3600).toString().padLeft(2, '0')}:${((activeTime % 3600) ~/ 60).toString().padLeft(2, '0')}",
+                                "Hours"))),
                 GestureDetector(
                     behavior: HitTestBehavior.translucent,
-                    onTap: () {
+                    onLongPress: () {
                       setState(() {
-                        _bStateRight = !_bStateRight;
+                        _bStateCenter = !_bStateCenter;
+                        _bStateRight = false;
                         _bStateLeft = false;
                       });
                     },
                     child: SizedBox(
                         width: (MediaQuery.of(context).size.width / 3),
-                        child: CircularPercentIndicator(
-                          radius: 30.0,
-                          lineWidth: 4.0,
-                          center: _bStateRight
-                              ? const Text("Steps")
-                              : const Text("Kcal"),
-                          percent: _bStateRight
-                              ? stepGoalPercentage()
-                              : kcalGoalPercentage(),
-                          backgroundColor: _bStateRight
-                              ? const Color.fromARGB(255, 130, 205, 71)
-                              : const Color.fromARGB(255, 205, 71, 71),
-                          circularStrokeCap: CircularStrokeCap.butt,
-                          progressColor:
-                              const Color.fromARGB(255, 124, 77, 255),
-                        )))
-              ]),
-              Row(children: [
-                activityBox(
-                    Image.asset('Assets/steps.png', width: 20, height: 20),
-                    goalChecker(),
-                    'Steps Left'),
-                activityBox(
-                    Image.asset('Assets/clock.png', width: 20, height: 20),
-                    "${(activeTime ~/ 3600).toString().padLeft(2, '0')}:${((activeTime % 3600) ~/ 60).toString().padLeft(2, '0')}",
-                    'Hours'),
-                activityBox(
-                    Image.asset('Assets/fire.png', width: 20, height: 20),
-                    caloriesBurned().toInt().toString(),
-                    'kcal'),
+                        child: _bStateCenter
+                            ? circularGoal(stepGoalPercentage(), 100.0,
+                                'Assets/steps.png', dailySteps(), 'Steps')
+                            : circularGoal(
+                                kcalGoalPercentage(),
+                                100.0,
+                                "Assets/fire.png",
+                                caloriesBurned().toInt().toString(),
+                                "Kcal"))),
+                GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onLongPress: () {
+                      setState(() {
+                        _bStateRight = !_bStateRight;
+                        _bStateLeft = false;
+                        _bStateCenter = false;
+                      });
+                    },
+                    child: SizedBox(
+                        width: (MediaQuery.of(context).size.width / 3),
+                        child: _bStateRight
+                            ? circularGoal(stepGoalPercentage(), 100.0,
+                                'Assets/steps.png', dailySteps(), 'Steps')
+                            : circularGoal(
+                                0.4, 100.0, "Assets/home.png", "30", "label"))),
               ]),
               const Divider(
                 thickness: 1,
