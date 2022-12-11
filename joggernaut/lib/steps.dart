@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 
 //import 'package:liquid_progress_indicator/liquid_progress_indicator.dart';
-
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pedometer/pedometer.dart';
@@ -13,6 +12,13 @@ import 'package:flutter_foreground_service/flutter_foreground_service.dart';
 DateTime now = DateTime.now();
 DateTime selectedDate = now;
 //const double pi = 3.1415926535897932;
+
+const Color purple = Color.fromARGB(255, 124, 77, 255);
+const Color greenBright = Color.fromARGB(255, 130, 205, 71);
+const Color green = Color.fromARGB(255, 84, 180, 53);
+const Color greenDark = Color.fromARGB(255, 55, 146, 55);
+const Color yellow = Color.fromARGB(255, 240, 255, 66);
+const Color mainColor = purple;
 
 String formatDate(DateTime d) {
   return d.toString().substring(0, 19);
@@ -42,7 +48,7 @@ class NavigationButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-            backgroundColor: const Color.fromARGB(255, 124, 77, 255),
+            backgroundColor: mainColor,
             textStyle:
                 const TextStyle(fontSize: 11.0, fontWeight: FontWeight.bold),
             shape: const RoundedRectangleBorder(
@@ -68,10 +74,6 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   int previousSteps = 0; //database
   int activeTime = 0; //database?
   int weight = 70; //database
-
-  bool _bStateLeft = false;
-  bool _bStateCenter = false;
-  bool _bStateRight = false;
 
   double kcalGoal = 400.0;
   double stepGoal = 10000.0;
@@ -161,9 +163,12 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   void dayChecker() {
     if (bufferNow != DateFormat.MMMd().format(now)) {
       saveStep();
-      previousSteps = int.parse(_steps);
-      activeTime = 0;
-      bufferNow = DateFormat.MMMd().format(now);
+      setState(() {
+        previousSteps = int.parse(_steps);
+        activeTime = 0;
+        selectedDate = now;
+        bufferNow = DateFormat.MMMd().format(now);
+      });
     }
   }
 
@@ -227,7 +232,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
         width: size,
         child: SfRadialGauge(
             enableLoadingAnimation: true,
-            animationDuration: 1000,
+            animationDuration: 1500,
             axes: <RadialAxis>[
               RadialAxis(
                   //startAngle: 270, çember
@@ -256,8 +261,10 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                       width: 0.10,
                       sizeUnit: GaugeSizeUnit.factor,
                       gradient: const SweepGradient(colors: <Color>[
-                        Color.fromARGB(255, 55, 20, 141),
-                        Color.fromARGB(255, 136, 93, 255)
+                        // Color.fromARGB(255, 55, 20, 141),
+                        // Color.fromARGB(255, 136, 93, 255)
+                        Color.fromARGB(255, 5, 233, 9),
+                        Color.fromARGB(255, 22, 167, 66)
                       ], stops: <double>[
                         0.25,
                         0.75
@@ -268,6 +275,53 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   }
 
   final globalKey = GlobalKey<ScaffoldState>();
+
+  List switchValue(int a) {
+    String value = "";
+    double percent = 0.0;
+
+    switch (a) {
+      case 0:
+        value = dailySteps();
+        percent = stepGoalPercentage();
+        break;
+      case 1:
+        value =
+            "${(activeTime ~/ 3600).toString().padLeft(2, '0')}:${((activeTime % 3600) ~/ 60).toString().padLeft(2, '0')}";
+        percent = timeGoalPercentage();
+        break;
+      case 2:
+        value = caloriesBurned().toInt().toString();
+        percent = kcalGoalPercentage();
+        break;
+      case 3:
+        value = "30";
+        percent = 0.9;
+        break;
+    }
+    return [percent, value];
+  }
+
+  late List<dynamic> focus = [0, 'Assets/green/steps.png', 'Steps'];
+  late List<dynamic> left = [1, "Assets/clock.png", "Hours"];
+  late List<dynamic> center = [2, "Assets/green/fire.png", "Kcal"];
+  late List<dynamic> right = [3, "Assets/home.png", "label"];
+
+  void swapFocus(String direction) {
+    setState(() {
+      final temp = focus;
+      if (direction == 'left') {
+        focus = left;
+        left = temp;
+      } else if (direction == 'center') {
+        focus = center;
+        center = temp;
+      } else if (direction == 'right') {
+        focus = right;
+        right = temp;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -281,7 +335,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
         key: globalKey,
         appBar: AppBar(
             title: const Text('Joggernaut'),
-            backgroundColor: const Color.fromARGB(255, 124, 77, 255),
+            backgroundColor: mainColor,
             leading: IconButton(
               icon: const Icon(Icons.density_medium),
               onPressed: () {
@@ -334,15 +388,20 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                             selectedDate.subtract(const Duration(days: 1));
                       });
                     }),
-                Text(DateFormat.MMMd().format(selectedDate),
+                Text(
+                    (selectedDate != now)
+                        ? DateFormat.MMMd().format(selectedDate)
+                        : "Today",
                     style: const TextStyle(
                         fontSize: 17, fontWeight: FontWeight.bold)),
                 TextButton(
                     child: const Text(">"),
                     onPressed: () {
                       setState(() {
-                        selectedDate =
-                            selectedDate.add(const Duration(days: 1));
+                        if (selectedDate != now) {
+                          selectedDate =
+                              selectedDate.add(const Duration(days: 1));
+                        }
                       });
                     })
               ]),
@@ -372,87 +431,44 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
               //         )),
               //   ],
               // ),
-              _bStateLeft
-                  ? circularGoal(
-                      timeGoalPercentage(),
-                      200.0,
-                      'Assets/clock.png',
-                      "${(activeTime ~/ 3600).toString().padLeft(2, '0')}:${((activeTime % 3600) ~/ 60).toString().padLeft(2, '0')}",
-                      'Hour')
-                  : _bStateCenter
-                      ? circularGoal(
-                          kcalGoalPercentage(),
-                          200.0,
-                          'Assets/fire.png',
-                          caloriesBurned().toInt().toString(),
-                          'Kcal')
-                      : _bStateRight
-                          ? circularGoal(
-                              0.4, 200.0, 'Assets/steps.png', "40", 'label')
-                          : circularGoal(stepGoalPercentage(), 200.0,
-                              'Assets/steps.png', dailySteps(), 'Steps'),
+
+              circularGoal(switchValue(focus[0])[0], 200.0, focus[1],
+                  switchValue(focus[0])[1], focus[2]),
               Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
                 GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onLongPress: () {
-                      setState(() {
-                        _bStateLeft = !_bStateLeft;
-                        _bStateRight = false;
-                        _bStateCenter = false;
-                      });
+                      swapFocus("left");
                     },
                     child: SizedBox(
                         width: (MediaQuery.of(context).size.width / 3),
                         height: 100,
-                        child: _bStateLeft
-                            ? circularGoal(stepGoalPercentage(), 100.0,
-                                'Assets/steps.png', dailySteps(), 'Steps')
-                            : circularGoal(
-                                timeGoalPercentage(),
-                                100.0,
-                                "Assets/clock.png",
-                                "${(activeTime ~/ 3600).toString().padLeft(2, '0')}:${((activeTime % 3600) ~/ 60).toString().padLeft(2, '0')}",
-                                "Hours"))),
+                        child: circularGoal(switchValue(left[0])[0], 100.0,
+                            left[1], switchValue(left[0])[1], left[2]))),
                 GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onLongPress: () {
-                      setState(() {
-                        _bStateCenter = !_bStateCenter;
-                        _bStateRight = false;
-                        _bStateLeft = false;
-                      });
+                      swapFocus("center");
                     },
                     child: SizedBox(
                         width: (MediaQuery.of(context).size.width / 3),
-                        child: _bStateCenter
-                            ? circularGoal(stepGoalPercentage(), 100.0,
-                                'Assets/steps.png', dailySteps(), 'Steps')
-                            : circularGoal(
-                                kcalGoalPercentage(),
-                                100.0,
-                                "Assets/fire.png",
-                                caloriesBurned().toInt().toString(),
-                                "Kcal"))),
+                        height: 100,
+                        child: circularGoal(switchValue(center[0])[0], 100.0,
+                            center[1], switchValue(center[0])[1], center[2]))),
                 GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onLongPress: () {
-                      setState(() {
-                        _bStateRight = !_bStateRight;
-                        _bStateLeft = false;
-                        _bStateCenter = false;
-                      });
+                      swapFocus("right");
                     },
                     child: SizedBox(
                         width: (MediaQuery.of(context).size.width / 3),
-                        child: _bStateRight
-                            ? circularGoal(stepGoalPercentage(), 100.0,
-                                'Assets/steps.png', dailySteps(), 'Steps')
-                            : circularGoal(
-                                0.4, 100.0, "Assets/home.png", "30", "label"))),
+                        height: 100,
+                        child: circularGoal(switchValue(right[0])[0], 100.0,
+                            right[1], switchValue(right[0])[1], right[2]))),
               ]),
               const Divider(
                 thickness: 1,
-                color: Color.fromARGB(255, 124, 77, 255),
+                color: mainColor,
               ),
               const Text(
                 'Pedestrian status:',
@@ -461,9 +477,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
               Image.asset(
                   _status == 'walking'
                       ? 'Assets/walking.png'
-                      : _status == 'stopped'
-                          ? 'Assets/standing.png'
-                          : 'Assets/loading_p.gif', // kalitesiz, değiştir
+                      : 'Assets/standing.png',
                   width: 80,
                   height: 80),
               Center(
