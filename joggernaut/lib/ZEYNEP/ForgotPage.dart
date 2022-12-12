@@ -46,12 +46,13 @@ class _ForgotPageState extends State<ForgotPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.deepPurple[300],
+        backgroundColor: Color.fromARGB(255, 33, 71, 102),
         elevation: 0,
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          Image.asset('Assets/pug.png', height: 300),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 25.0),
             child: Text(
@@ -68,7 +69,7 @@ class _ForgotPageState extends State<ForgotPage> {
             child: Container(
               decoration: BoxDecoration(
                   color: Colors.white,
-                  border: Border.all(color: Colors.deepPurpleAccent),
+                  border: Border.all(color: Color.fromARGB(255, 33, 71, 102)),
                   borderRadius: BorderRadius.circular(17)),
               child: Padding(
                 padding: const EdgeInsets.only(left: 20.0),
@@ -90,7 +91,7 @@ class _ForgotPageState extends State<ForgotPage> {
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 14)),
-              color: Colors.deepPurple[300])
+              color: Color.fromARGB(255, 33, 71, 102))
         ],
       ),
     );

@@ -29,6 +29,7 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  google_sign_in: ^5.4.2
   cloud_firestore: ^4.1.0
   firebase_auth: ^4.1.4
   flutter:
@@ -47,6 +48,12 @@ dependencies:
   flutter_background_service: ^2.4.5
   flutter_foreground_service: ^0.3.0
   firebase_core: ^2.3.0
+
+  #state management
+  provider: ^6.0.4
+
+  #google icon
+  font_awesome_flutter: ^10.3.0
 
 dev_dependencies:
   flutter_test:
@@ -74,6 +81,8 @@ flutter:
     - Assets/
     - Assets/logo.svg
     - Assets/logopng.png
+    - Assets/background.jpeg
+    - Assets/signup.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -2,7 +2,10 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import "package:flutter/material.dart";
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:joggernaut/ZEYNEP/ForgotPage.dart';
+import 'package:joggernaut/ZEYNEP/GoogleSign.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   final VoidCallback showRegisterPage;
@@ -39,13 +42,13 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomLeft,
-              colors: [
-            Color.fromRGBO(240, 255, 66, 1),
-            Color.fromRGBO(55, 146, 55, 1)
-          ])), //BURASI GRADYANTLIĞI SAĞLAYAN CONTAİNER WRAPİ
+        image: DecorationImage(
+          image: AssetImage(
+            "Assets/background.jpeg",
+          ),
+          fit: BoxFit.cover,
+        ),
+      ),
       child: Scaffold(
           backgroundColor: Colors.transparent,
           body: SafeArea(
@@ -54,25 +57,24 @@ class _LoginPageState extends State<LoginPage> {
               //bu wrap yazı yazmak istedğimizde klavye çıakrken ekran bozulmasınd iye
               child: Column(children: [
                 // Welcome Part
-                Text('We Jog Cuz We Pog!',
+                Text('JOGGERNAUT',
                     style: TextStyle(
+                        fontFamily: "Bebas",
+                        fontSize: 30,
+                        letterSpacing: 5,
                         fontWeight: FontWeight.bold,
-                        fontSize: 24,
-                        color: Color.fromRGBO(124, 77, 255, 1))),
-
-                // LOGO
-                Image(image: AssetImage('Assets/logopng.png')),
+                        color: Color.fromARGB(255, 153, 153, 153))),
 
                 // LOGIN - email
 
-                SizedBox(height: 60),
+                SizedBox(height: 450),
 
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Container(
                     decoration: BoxDecoration(
                         color: Colors.white,
-                        border: Border.all(color: Colors.deepPurpleAccent),
+                        border: Border.all(color: Colors.black),
                         borderRadius: BorderRadius.circular(17)),
                     child: Padding(
                       padding: const EdgeInsets.only(left: 20.0),
@@ -92,11 +94,11 @@ class _LoginPageState extends State<LoginPage> {
                 // LOGIN - Password
 
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Container(
                     decoration: BoxDecoration(
                         color: Colors.white,
-                        border: Border.all(color: Colors.deepPurpleAccent),
+                        border: Border.all(color: Colors.black),
                         borderRadius: BorderRadius.circular(17)),
                     child: Padding(
                       padding: const EdgeInsets.only(left: 20.0),
@@ -116,26 +118,58 @@ class _LoginPageState extends State<LoginPage> {
 
                 // LOGIN - SIGNIN
 
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30),
-                  child: GestureDetector(
-                    onTap: signIn,
-                    child: Container(
-                      padding: EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                          color: Colors.deepPurple,
-                          borderRadius: BorderRadius.circular(17)),
-                      child: Center(
-                          child: Text('Sign In',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18))),
+                Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 25),
+                      child: GestureDetector(
+                        onTap: signIn,
+                        child: Container(
+                          padding: EdgeInsets.only(
+                              top: 18, bottom: 18, right: 55, left: 55),
+                          decoration: BoxDecoration(
+                              color: Color.fromARGB(255, 33, 71, 102),
+                              borderRadius: BorderRadius.circular(17)),
+                          child: Center(
+                              child: Text('Sign In',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15))),
+                        ),
+                      ),
                     ),
-                  ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: ElevatedButton.icon(
+                          style: ButtonStyle(
+                              padding: MaterialStateProperty.all<EdgeInsets>(
+                                  EdgeInsets.all(13)),
+                              backgroundColor:
+                                  MaterialStateProperty.all(Colors.white),
+                              shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(17)))),
+                          onPressed: () {
+                            final provider = Provider.of<GoogleSignInProvider>(
+                                context,
+                                listen: false);
+                            provider.googleLogin();
+                          },
+                          icon: FaIcon(FontAwesomeIcons.google,
+                              color: Colors.red),
+                          label: Text('Sign in with Google',
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15))),
+                    )
+                  ],
                 ),
 
-                SizedBox(height: 180),
+                SizedBox(height: 35),
 
                 //FOOT
 
