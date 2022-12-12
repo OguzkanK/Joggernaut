@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "85938159834",
+    "project_id": "joggernaut-6f8b9",
+    "storage_bucket": "joggernaut-6f8b9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:85938159834:android:d19b474263777ec9c065e3",
+        "android_client_info": {
+          "package_name": "com.example.joggernaut"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "85938159834-n5a5vknf55bkiad60a9i9jeetre3uof5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0n4Y8MzIbdOYqByo3FR9yufo012lhMZU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "85938159834-n5a5vknf55bkiad60a9i9jeetre3uof5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
