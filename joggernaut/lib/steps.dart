@@ -14,11 +14,13 @@ DateTime selectedDate = now;
 //const double pi = 3.1415926535897932;
 
 const Color purple = Color.fromARGB(255, 124, 77, 255);
+const Color black = Color.fromARGB(255, 14, 14, 14);
 const Color greenBright = Color.fromARGB(255, 130, 205, 71);
 const Color green = Color.fromARGB(255, 84, 180, 53);
 const Color greenDark = Color.fromARGB(255, 55, 146, 55);
 const Color yellow = Color.fromARGB(255, 240, 255, 66);
-const Color mainColor = purple;
+const Color blue = Color.fromARGB(255, 33, 71, 132);
+const Color mainColor = blue;
 
 String formatDate(DateTime d) {
   return d.toString().substring(0, 19);
@@ -94,7 +96,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
     Timer.periodic(const Duration(seconds: 1), (Timer t) => walkingTime());
 
     WidgetsBinding.instance.addObserver(this);
-    retrieveDate();
+    retrieveData();
 
     initPlatformState();
   }
@@ -202,7 +204,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
     await prefs.setInt("previousSteps", int.parse(_steps));
   }
 
-  Future<void> retrieveDate() async {
+  Future<void> retrieveData() async {
     final prefs = await SharedPreferences.getInstance();
 
     bufferNow = prefs.getString('bufferNow') ?? DateFormat.MMMd().format(now);
@@ -217,9 +219,12 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
         children: [
           icon,
           Text(value,
-              style:
-                  const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
-          Text(label, style: const TextStyle(fontSize: 14)),
+              style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white)),
+          Text(label,
+              style: const TextStyle(fontSize: 14, color: Colors.white)),
         ],
       ),
     );
@@ -250,7 +255,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                   showLabels: false,
                   showTicks: false,
                   axisLineStyle: const AxisLineStyle(
-                    color: Color.fromARGB(100, 100, 100, 100),
+                    color: Color.fromARGB(160, 160, 160, 160),
                     thickness: 0.06,
                     thicknessUnit: GaugeSizeUnit.factor,
                   ),
@@ -263,8 +268,13 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                       gradient: const SweepGradient(colors: <Color>[
                         // Color.fromARGB(255, 55, 20, 141),
                         // Color.fromARGB(255, 136, 93, 255)
-                        Color.fromARGB(255, 5, 233, 9),
-                        Color.fromARGB(255, 22, 167, 66)
+                        //Color.fromARGB(255, 5, 233, 9),
+                        // Color.fromARGB(255, 22, 167, 66)
+                        Color.fromARGB(255, 55, 99, 250),
+                        blue
+                        //Colors.green,
+                        //Colors.yellow,
+                        //Colors.red
                       ], stops: <double>[
                         0.25,
                         0.75
@@ -302,9 +312,9 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
     return [percent, value];
   }
 
-  late List<dynamic> focus = [0, 'Assets/green/steps.png', 'Steps'];
-  late List<dynamic> left = [1, "Assets/clock.png", "Hours"];
-  late List<dynamic> center = [2, "Assets/green/fire.png", "Kcal"];
+  late List<dynamic> focus = [0, 'Assets/blue/steps.png', 'Steps'];
+  late List<dynamic> left = [1, "Assets/blue/clock.png", "Hours"];
+  late List<dynamic> center = [2, "Assets/blue/fire.png", "Kcal"];
   late List<dynamic> right = [3, "Assets/home.png", "label"];
 
   void swapFocus(String direction) {
@@ -349,8 +359,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
               SizedBox(
                   height: AppBar().preferredSize.height + kToolbarHeight,
                   child: const DrawerHeader(
-                    decoration:
-                        BoxDecoration(color: Color.fromARGB(255, 124, 77, 255)),
+                    decoration: BoxDecoration(color: mainColor),
                     child: Text('Dashboard'),
                   )),
               ListTile(
@@ -365,16 +374,17 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
           ),
         ),
         body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color.fromARGB(255, 200, 200, 255),
-                Color.fromARGB(255, 255, 255, 255)
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.center,
-            ),
-          ),
+          color: black,
+          // decoration: const BoxDecoration(
+          //   gradient: LinearGradient(
+          //     colors: [
+          //       Color.fromARGB(255, 200, 200, 255),
+          //       Color.fromARGB(255, 255, 255, 255)
+          //     ],
+          //     begin: Alignment.topCenter,
+          //     end: Alignment.center,
+          //   ),
+          //),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
@@ -393,7 +403,9 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                         ? DateFormat.MMMd().format(selectedDate)
                         : "Today",
                     style: const TextStyle(
-                        fontSize: 17, fontWeight: FontWeight.bold)),
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white)),
                 TextButton(
                     child: const Text(">"),
                     onPressed: () {
@@ -472,20 +484,20 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
               ),
               const Text(
                 'Pedestrian status:',
-                style: TextStyle(fontSize: 15),
+                style: TextStyle(fontSize: 15, color: Colors.white),
               ),
               Image.asset(
                   _status == 'walking'
-                      ? 'Assets/walking.png'
-                      : 'Assets/standing.png',
+                      ? 'Assets/blue/walking.png'
+                      : 'Assets/blue/standing.png',
                   width: 80,
                   height: 80),
               Center(
                 child: Text(
                   _status,
                   style: _status == 'walking' || _status == 'stopped'
-                      ? const TextStyle(fontSize: 20)
-                      : const TextStyle(fontSize: 15),
+                      ? const TextStyle(fontSize: 20, color: Colors.white)
+                      : const TextStyle(fontSize: 15, color: Colors.white),
                 ),
               ),
               Row(
