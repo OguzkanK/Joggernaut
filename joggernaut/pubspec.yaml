@@ -54,6 +54,8 @@ dependencies:
 
   #google icon
   font_awesome_flutter: ^10.3.0
+  syncfusion_flutter_gauges: ^20.3.60
+  shared_preferences: ^2.0.15
 
 dev_dependencies:
   flutter_test:
@@ -83,7 +85,10 @@ flutter:
     - Assets/logopng.png
     - Assets/background.jpeg
     - Assets/signup.jpg
-
+    
+    - Assets/green/
+    - Assets/blue/
+  
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

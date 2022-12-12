@@ -3,7 +3,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../AuthPage.dart';
-import 'HomePage.dart';
+import '../steps.dart';
 
 class MainPage extends StatelessWidget {
   const MainPage({super.key}); //5.54
@@ -15,7 +15,7 @@ class MainPage extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return HomePage(); //giriş yapılıysa main page e at
+            return StepsPage(); //giriş yapılıysa main page e at
           } else {
             return AuthPage(); //giriş yapılı değilse logine at
           }
