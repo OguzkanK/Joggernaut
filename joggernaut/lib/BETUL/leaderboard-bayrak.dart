@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'leaderboard-adim.dart';
+import 'package:joggernaut/steps.dart';
 
 class LeaderboardFlag extends StatefulWidget {
   const LeaderboardFlag({Key? key}) : super(key: key);
@@ -71,7 +72,16 @@ class _LeaderboardFlagState extends State<LeaderboardFlag> {
     return Scaffold(
       backgroundColor: Color.fromRGBO(23, 23, 23, 1),
       appBar: AppBar(
-        leading: Icon(Icons.arrow_back),
+        leading: Builder(
+          builder: (BuildContext context) {
+            return IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => StepsPage()));
+                });
+          },
+        ),
         actions: [
           IconButton(
               onPressed: () {
