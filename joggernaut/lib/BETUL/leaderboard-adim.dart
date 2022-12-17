@@ -208,8 +208,7 @@ class _LeaderboardStepState extends State<LeaderboardStep> {
             Container(
               margin: EdgeInsets.all(10),
               child: SizedBox(
-                height:
-                    MediaQuery.of(context).size.height - 385, ///////////////
+                height: MediaQuery.of(context).size.height - 400,
                 child: ListView.separated(
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
