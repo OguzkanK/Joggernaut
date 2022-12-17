@@ -74,11 +74,6 @@ class _MapPageState extends State<MapPage> {
     return d * 1000;
   }
 
-  static const initialPosition = CameraPosition(
-    target: LatLng(41, 28),
-    zoom: 14.4746,
-  );
-
   void mapCreatedCallback(GoogleMapController controller) {
     location.onLocationChanged.listen((l) {
       Circle locationCircle = Circle(
@@ -150,8 +145,19 @@ class _MapPageState extends State<MapPage> {
           Expanded(
             child: GoogleMap(
               mapType: MapType.hybrid,
-              initialCameraPosition: initialPosition,
-              onMapCreated: (GoogleMapController controller) {
+              initialCameraPosition: const CameraPosition(
+                target: LatLng(0, 0),
+                zoom: 15.5,
+              ),
+              onMapCreated: (GoogleMapController controller) async {
+                var here = await location.getLocation();
+                controller.animateCamera(
+                  CameraUpdate.newCameraPosition(
+                    CameraPosition(
+                        zoom: 15.5,
+                        target: LatLng(here.latitude!, here.longitude!)),
+                  ),
+                );
                 mapCreatedCallback(controller);
               },
               myLocationButtonEnabled: true,

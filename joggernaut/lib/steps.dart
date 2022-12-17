@@ -527,7 +527,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => LeaderboardStep()));
+                              builder: (context) => const LeaderboardStep()));
                     },
                   )
                 ],
