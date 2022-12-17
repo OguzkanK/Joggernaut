@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'package:joggernaut/map_page.dart';
 
 //import 'package:liquid_progress_indicator/liquid_progress_indicator.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
@@ -504,7 +505,12 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                     key: const Key('MapButton'),
                     text: 'Map',
                     image: 'Assets/map.png',
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const MapPage()));
+                    },
                   ),
                   NavigationButton(
                     key: const Key('RaceButton'),
