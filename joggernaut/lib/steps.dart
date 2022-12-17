@@ -8,6 +8,7 @@ import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:intl/intl.dart';
+import 'BETUL/leaderboard-adim.dart';
 
 DateTime selectedDate = DateTime.now();
 //const double pi = 3.1415926535897932;
@@ -522,7 +523,12 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                     key: const Key('LeaderboardButton'),
                     text: 'Leaderboard',
                     image: 'Assets/leaderboard.png',
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => LeaderboardStep()));
+                    },
                   )
                 ],
               )
