@@ -303,7 +303,12 @@ class _MapPageState extends State<MapPage> {
                   key: const Key('HomeButton'),
                   text: 'Home',
                   image: 'Assets/home.png',
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const StepsPage()));
+                  },
                 ),
                 NavigationButton(
                   key: const Key('MapButton'),
