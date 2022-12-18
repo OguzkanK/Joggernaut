@@ -202,7 +202,8 @@ class _LeaderboardFlagState extends State<LeaderboardFlag> {
             Container(
               margin: EdgeInsets.all(10),
               child: SizedBox(
-                height: MediaQuery.of(context).size.height - 385,
+                height: MediaQuery.of(context).size.height -
+                    (305 + kToolbarHeight + MediaQuery.of(context).padding.top),
                 child: ListView.separated(
                     shrinkWrap: true,
                     itemBuilder: (context, index) {

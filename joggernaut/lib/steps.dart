@@ -347,7 +347,9 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
             padding: EdgeInsets.zero,
             children: [
               SizedBox(
-                  height: AppBar().preferredSize.height,
+                  height: AppBar().preferredSize.height +
+                      MediaQuery.of(context).padding.top +
+                      8,
                   child: const DrawerHeader(
                     decoration: BoxDecoration(color: mainColor),
                     child: Text('Dashboard'),
