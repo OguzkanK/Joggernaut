@@ -7,8 +7,6 @@ import 'package:flutter_foreground_service/flutter_foreground_service.dart';
 import 'ZEYNEP/GoogleSign.dart';
 import 'ZEYNEP/RedirectPage.dart'; // Firebase import
 
-// Firebase import
-
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized(); //Firebase starting
   await Firebase.initializeApp(); //Firebase starting

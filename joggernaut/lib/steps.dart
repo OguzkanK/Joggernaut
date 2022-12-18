@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:joggernaut/map_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-//import 'package:liquid_progress_indicator/liquid_progress_indicator.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pedometer/pedometer.dart';
@@ -11,7 +12,6 @@ import 'package:intl/intl.dart';
 import 'BETUL/leaderboard-adim.dart';
 
 DateTime selectedDate = DateTime.now();
-//const double pi = 3.1415926535897932;
 
 const Color purple = Color.fromARGB(255, 124, 77, 255);
 const Color black = Color.fromARGB(255, 14, 14, 14);
@@ -100,6 +100,21 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
     }
   }
 
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  void saveToDB() async {
+    final User user = auth.currentUser!;
+    final collectionReference = FirebaseFirestore.instance.collection('users');
+
+    final query = collectionReference.where('email', isEqualTo: user.email);
+    final querySnapshot = await query.get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      final documentSnapshot = querySnapshot.docs.first;
+      await documentSnapshot.reference.update(
+          {'step': int.parse(_steps), 'daily_step': int.parse(dailySteps())});
+    }
+  }
+
   double goalPercentage(double goal, double progress) {
     double percentage = progress / goal;
     if (percentage > 1.0) percentage = 1.0;
@@ -165,6 +180,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
         bufferNow = now();
       });
     }
+    saveToDB();
   }
 
   void walkingTime() {
@@ -209,6 +225,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
 
     await prefs.setString('bufferNow', now());
     await prefs.setInt('activeTime', activeTime);
+    saveToDB();
   }
 
   Future<void> saveStep() async {
@@ -398,34 +415,6 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                       });
                     })
               ]),
-
-              //iç içe su
-
-              // Stack(
-              //   children: [
-              //     Transform(
-              //         alignment: Alignment.center,
-              //         transform: Matrix4.rotationY(pi * 4),
-              //         child: SizedBox(
-              //             height: 100,
-              //             width: 100,
-              //             child: LiquidCircularProgressIndicator(
-              //               value: 0.75,
-              //               valueColor: AlwaysStoppedAnimation(
-              //                   Color.fromARGB(255, 20, 153, 62)),
-              //               backgroundColor: Color.fromARGB(0, 251, 251, 251),
-              //             ))),
-              //     SizedBox(
-              //         height: 100,
-              //         width: 100,
-              //         child: LiquidCircularProgressIndicator(
-              //           value: 0.75,
-              //           valueColor: AlwaysStoppedAnimation(Colors.green),
-              //           backgroundColor: Color.fromARGB(0, 244, 4, 4),
-              //         )),
-              //   ],
-              // ),
-
               circularGoalProgression(swapFocusValues(focus[0])[0], 200.0,
                   focus[1], swapFocusValues(focus[0])[1], focus[2]),
               Row(crossAxisAlignment: CrossAxisAlignment.end, children: [

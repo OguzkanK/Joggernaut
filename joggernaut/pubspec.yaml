@@ -57,6 +57,7 @@ dependencies:
   font_awesome_flutter: ^10.3.0
   syncfusion_flutter_gauges: ^20.3.60
   shared_preferences: ^2.0.15
+  firebase_database: ^10.0.7
 
 dev_dependencies:
   flutter_test:
