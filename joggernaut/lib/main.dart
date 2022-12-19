@@ -1,23 +1,11 @@
-// import 'package:flutter/material.dart';
-// import 'steps.dart';
-
-// // Firebase import
-// void main() {
-//   runApp(
-//       const MaterialApp(home: StepsPage(), debugShowCheckedModeBanner: false));
-//   startForegroundService();
-// }
-
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_foreground_service/flutter_foreground_service.dart';
+
 import 'ZEYNEP/GoogleSign.dart';
-import 'steps.dart';
-
 import 'ZEYNEP/RedirectPage.dart'; // Firebase import
-
-// Firebase import
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized(); //Firebase starting
@@ -37,4 +25,8 @@ class MyApp extends StatelessWidget {
           home: MainPage(),
         ),
       );
+}
+
+void startForegroundService() async {
+  ForegroundService().start();
 }

@@ -126,7 +126,7 @@ class _LoginPageState extends State<LoginPage> {
                         onTap: signIn,
                         child: Container(
                           padding: EdgeInsets.only(
-                              top: 18, bottom: 18, right: 55, left: 55),
+                              top: 18, bottom: 18, right: 40, left: 55),
                           decoration: BoxDecoration(
                               color: Color.fromARGB(255, 33, 71, 102),
                               borderRadius: BorderRadius.circular(17)),
@@ -140,11 +140,11 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 0.0),
                       child: ElevatedButton.icon(
                           style: ButtonStyle(
                               padding: MaterialStateProperty.all<EdgeInsets>(
-                                  EdgeInsets.all(13)),
+                                  EdgeInsets.all(16)),
                               backgroundColor:
                                   MaterialStateProperty.all(Colors.white),
                               shape: MaterialStateProperty.all<

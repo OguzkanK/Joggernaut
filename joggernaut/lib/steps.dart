@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'package:joggernaut/map_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-//import 'package:liquid_progress_indicator/liquid_progress_indicator.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_foreground_service/flutter_foreground_service.dart';
+import 'BETUL/leaderboard-adim.dart';
 
-DateTime now = DateTime.now();
-DateTime selectedDate = now;
-//const double pi = 3.1415926535897932;
+DateTime selectedDate = DateTime.now();
 
 const Color purple = Color.fromARGB(255, 124, 77, 255);
 const Color black = Color.fromARGB(255, 14, 14, 14);
@@ -21,14 +21,6 @@ const Color greenDark = Color.fromARGB(255, 55, 146, 55);
 const Color yellow = Color.fromARGB(255, 240, 255, 66);
 const Color blue = Color.fromARGB(255, 33, 71, 132);
 const Color mainColor = blue;
-
-String formatDate(DateTime d) {
-  return d.toString().substring(0, 19);
-}
-
-void startForegroundService() async {
-  ForegroundService().start();
-}
 
 class NavigationButton extends StatelessWidget {
   final String text;
@@ -73,13 +65,13 @@ class StepsPage extends StatefulWidget {
 }
 
 class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
-  int previousSteps = 0; //database
-  int activeTime = 0; //database?
-  int weight = 70; //database
+  int previousSteps = 0; // database?
+  int activeTime = 0; // database
+  int weight = 70; // database
 
-  double kcalGoal = 400.0;
-  double stepGoal = 10000.0;
-  double timeGoal = 7000.0;
+  double kcalGoal = 400.0; // database
+  double stepGoal = 10000.0; // database
+  double timeGoal = 7000.0; // database
 
   late Stream<StepCount> _stepCountStream;
   late Stream<PedestrianStatus> _pedestrianStatusStream;
@@ -87,6 +79,11 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   String _status = 'Loading';
   String _steps = '0';
   String bufferNow = "";
+  String selectedTime = "0";
+  String selectedKcal = "0";
+  String selectedSteps = "0";
+
+  bool isSelectedDayToday = true;
 
   @override
   void initState() {
@@ -106,6 +103,59 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
     if (state == AppLifecycleState.paused) {
       saveValue();
     }
+  }
+
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  void saveToDB() async {
+    final User user = auth.currentUser!;
+    final collectionReference = FirebaseFirestore.instance.collection('users');
+
+    final query = collectionReference.where('email', isEqualTo: user.email);
+    final querySnapshot = await query.get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      final documentSnapshot = querySnapshot.docs.first;
+      await documentSnapshot.reference.set({
+        'step': int.parse(_steps),
+        'calendar': {
+          now(): {
+            'step': dailySteps(),
+            'time': dailyTime(),
+            'kcal': caloriesBurned().toInt().toString()
+          }
+        }
+      }, SetOptions(merge: true));
+    }
+  }
+
+  void reset() {
+    selectedTime = "0";
+    selectedKcal = "0";
+    selectedSteps = "0";
+  }
+
+  void getData() async {
+    final User user = auth.currentUser!;
+    final collectionReference = FirebaseFirestore.instance.collection('users');
+
+    final query = collectionReference.where('email', isEqualTo: user.email);
+    final querySnapshot = await query.get();
+    setState(() {
+      if (querySnapshot.docs.isNotEmpty) {
+        final db = querySnapshot.docs.first;
+        try {
+          final data =
+              db.data()['calendar'][DateFormat.MMMd().format(selectedDate)];
+          selectedTime = data["time"];
+          selectedKcal = data["kcal"];
+          selectedSteps = data["step"];
+        } catch (e) {
+          reset();
+        }
+      } else {
+        reset();
+      }
+    });
   }
 
   double goalPercentage(double goal, double progress) {
@@ -163,39 +213,72 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   }
 
   void dayChecker() {
-    if (bufferNow != DateFormat.MMMd().format(now)) {
+    // kaydedilen ay/gün şuanki tarihten farklıysa gün değişmiştir
+    if (bufferNow != now()) {
       saveStep();
       setState(() {
         previousSteps = int.parse(_steps);
         activeTime = 0;
-        selectedDate = now;
-        bufferNow = DateFormat.MMMd().format(now);
+        selectedDate = DateTime.now();
+        bufferNow = now();
       });
     }
-  }
-
-  String dailySteps() {
-    return (int.parse(_steps) - previousSteps).toString();
-  }
-
-  String goalChecker() {
-    int step = stepGoal.toInt() - int.parse(_steps) - previousSteps;
-    return (step < 0) ? step.toString() : "0";
+    if (isSelectedDayToday) saveToDB();
   }
 
   void walkingTime() {
     if (_status == "walking") ++activeTime;
   }
 
+  void swapFocus(String direction) {
+    setState(() {
+      final temp = focus;
+      if (direction == 'left') {
+        focus = left;
+        left = temp;
+      } else if (direction == 'center') {
+        focus = center;
+        center = temp;
+      } else if (direction == 'right') {
+        focus = right;
+        right = temp;
+      }
+    });
+  }
+
+  String now() {
+    return DateFormat.MMMd().format(DateTime.now());
+  }
+
+  String dailyTime() {
+    return (isSelectedDayToday)
+        ? "${(activeTime ~/ 3600).toString().padLeft(2, '0')}:${((activeTime % 3600) ~/ 60).toString().padLeft(2, '0')}"
+        : selectedTime;
+  }
+
+  String dailySteps() {
+    return (isSelectedDayToday)
+        ? (int.parse(_steps) - previousSteps).toString()
+        : selectedSteps;
+  }
+
+  String stepsLeft() {
+    int step = stepGoal.toInt() - (int.parse(_steps) - previousSteps);
+    return (step < 0) ? step.toString() : "0";
+  }
+
   double caloriesBurned() {
-    return double.parse(dailySteps()) * 0.04 * (weight / 75);
+    return (isSelectedDayToday)
+        ? double.parse(dailySteps()) * 0.04 * (weight / 75)
+        : double.parse(selectedKcal);
   }
 
   Future<void> saveValue() async {
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.setString('bufferNow', DateFormat.MMMd().format(now));
+    await prefs.setString('bufferNow', now());
     await prefs.setInt('activeTime', activeTime);
+    saveToDB();
   }
 
   Future<void> saveStep() async {
@@ -207,7 +290,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   Future<void> retrieveData() async {
     final prefs = await SharedPreferences.getInstance();
 
-    bufferNow = prefs.getString('bufferNow') ?? DateFormat.MMMd().format(now);
+    bufferNow = prefs.getString('bufferNow') ?? now();
     activeTime = prefs.getInt('activeTime') ?? 0;
     previousSteps = prefs.getInt('previousSteps') ?? 0;
   }
@@ -230,7 +313,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
     );
   }
 
-  SizedBox circularGoal(
+  SizedBox circularGoalProgression(
       double percentage, double size, String icon, String value, String label) {
     return SizedBox(
         height: size,
@@ -240,8 +323,6 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
             animationDuration: 1500,
             axes: <RadialAxis>[
               RadialAxis(
-                  //startAngle: 270, çember
-                  //endAngle: 270,
                   annotations: <GaugeAnnotation>[
                     GaugeAnnotation(
                         widget: SizedBox(
@@ -261,20 +342,12 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                   ),
                   pointers: <GaugePointer>[
                     RangePointer(
-                      cornerStyle: CornerStyle.bothCurve,
                       value: percentage * 100,
                       width: 0.10,
                       sizeUnit: GaugeSizeUnit.factor,
                       gradient: const SweepGradient(colors: <Color>[
-                        // Color.fromARGB(255, 55, 20, 141),
-                        // Color.fromARGB(255, 136, 93, 255)
-                        //Color.fromARGB(255, 5, 233, 9),
-                        // Color.fromARGB(255, 22, 167, 66)
-                        Color.fromARGB(255, 55, 99, 250),
-                        blue
-                        //Colors.green,
-                        //Colors.yellow,
-                        //Colors.red
+                        blue,
+                        Color.fromARGB(255, 0, 200, 255)
                       ], stops: <double>[
                         0.25,
                         0.75
@@ -286,7 +359,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
 
   final globalKey = GlobalKey<ScaffoldState>();
 
-  List switchValue(int a) {
+  List swapFocusValues(int a) {
     String value = "";
     double percent = 0.0;
 
@@ -296,8 +369,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
         percent = stepGoalPercentage();
         break;
       case 1:
-        value =
-            "${(activeTime ~/ 3600).toString().padLeft(2, '0')}:${((activeTime % 3600) ~/ 60).toString().padLeft(2, '0')}";
+        value = dailyTime();
         percent = timeGoalPercentage();
         break;
       case 2:
@@ -305,8 +377,8 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
         percent = kcalGoalPercentage();
         break;
       case 3:
-        value = "30";
-        percent = 0.9;
+        value = "5.00";
+        percent = 1.0;
         break;
     }
     return [percent, value];
@@ -315,23 +387,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   late List<dynamic> focus = [0, 'Assets/blue/steps.png', 'Steps'];
   late List<dynamic> left = [1, "Assets/blue/clock.png", "Hours"];
   late List<dynamic> center = [2, "Assets/blue/fire.png", "Kcal"];
-  late List<dynamic> right = [3, "Assets/home.png", "label"];
-
-  void swapFocus(String direction) {
-    setState(() {
-      final temp = focus;
-      if (direction == 'left') {
-        focus = left;
-        left = temp;
-      } else if (direction == 'center') {
-        focus = center;
-        center = temp;
-      } else if (direction == 'right') {
-        focus = right;
-        right = temp;
-      }
-    });
-  }
+  late List<dynamic> right = [3, "Assets/blue/distance.png", "Km"];
 
   @override
   Widget build(BuildContext context) {
@@ -357,7 +413,9 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
             padding: EdgeInsets.zero,
             children: [
               SizedBox(
-                  height: AppBar().preferredSize.height + kToolbarHeight,
+                  height: AppBar().preferredSize.height +
+                      MediaQuery.of(context).padding.top +
+                      8,
                   child: const DrawerHeader(
                     decoration: BoxDecoration(color: mainColor),
                     child: Text('Dashboard'),
@@ -375,20 +433,9 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
         ),
         body: Container(
           color: black,
-          // decoration: const BoxDecoration(
-          //   gradient: LinearGradient(
-          //     colors: [
-          //       Color.fromARGB(255, 200, 200, 255),
-          //       Color.fromARGB(255, 255, 255, 255)
-          //     ],
-          //     begin: Alignment.topCenter,
-          //     end: Alignment.center,
-          //   ),
-          //),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              //const SizedBox(),
               Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
                 TextButton(
                     child: const Text("<"),
@@ -396,10 +443,12 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                       setState(() {
                         selectedDate =
                             selectedDate.subtract(const Duration(days: 1));
+                        isSelectedDayToday = false;
+                        getData();
                       });
                     }),
                 Text(
-                    (selectedDate != now)
+                    (DateFormat.MMMd().format(selectedDate) != now())
                         ? DateFormat.MMMd().format(selectedDate)
                         : "Today",
                     style: const TextStyle(
@@ -410,42 +459,22 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                     child: const Text(">"),
                     onPressed: () {
                       setState(() {
-                        if (selectedDate != now) {
+                        if (DateFormat.MMMd().format(selectedDate) != now()) {
                           selectedDate =
                               selectedDate.add(const Duration(days: 1));
+                        }
+                        if (DateFormat.MMMd().format(selectedDate) != now()) {
+                          isSelectedDayToday = false;
+                          getData();
+                        } else {
+                          isSelectedDayToday = true;
+                          reset();
                         }
                       });
                     })
               ]),
-              //iç içe su
-
-              // Stack(
-              //   children: [
-              //     Transform(
-              //         alignment: Alignment.center,
-              //         transform: Matrix4.rotationY(pi * 4),
-              //         child: SizedBox(
-              //             height: 100,
-              //             width: 100,
-              //             child: LiquidCircularProgressIndicator(
-              //               value: 0.75,
-              //               valueColor: AlwaysStoppedAnimation(
-              //                   Color.fromARGB(255, 20, 153, 62)),
-              //               backgroundColor: Color.fromARGB(0, 251, 251, 251),
-              //             ))),
-              //     SizedBox(
-              //         height: 100,
-              //         width: 100,
-              //         child: LiquidCircularProgressIndicator(
-              //           value: 0.75,
-              //           valueColor: AlwaysStoppedAnimation(Colors.green),
-              //           backgroundColor: Color.fromARGB(0, 244, 4, 4),
-              //         )),
-              //   ],
-              // ),
-
-              circularGoal(switchValue(focus[0])[0], 200.0, focus[1],
-                  switchValue(focus[0])[1], focus[2]),
+              circularGoalProgression(swapFocusValues(focus[0])[0], 200.0,
+                  focus[1], swapFocusValues(focus[0])[1], focus[2]),
               Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
                 GestureDetector(
                     behavior: HitTestBehavior.translucent,
@@ -455,8 +484,12 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                     child: SizedBox(
                         width: (MediaQuery.of(context).size.width / 3),
                         height: 100,
-                        child: circularGoal(switchValue(left[0])[0], 100.0,
-                            left[1], switchValue(left[0])[1], left[2]))),
+                        child: circularGoalProgression(
+                            swapFocusValues(left[0])[0],
+                            100.0,
+                            left[1],
+                            swapFocusValues(left[0])[1],
+                            left[2]))),
                 GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onLongPress: () {
@@ -465,8 +498,12 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                     child: SizedBox(
                         width: (MediaQuery.of(context).size.width / 3),
                         height: 100,
-                        child: circularGoal(switchValue(center[0])[0], 100.0,
-                            center[1], switchValue(center[0])[1], center[2]))),
+                        child: circularGoalProgression(
+                            swapFocusValues(center[0])[0],
+                            100.0,
+                            center[1],
+                            swapFocusValues(center[0])[1],
+                            center[2]))),
                 GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onLongPress: () {
@@ -475,8 +512,12 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                     child: SizedBox(
                         width: (MediaQuery.of(context).size.width / 3),
                         height: 100,
-                        child: circularGoal(switchValue(right[0])[0], 100.0,
-                            right[1], switchValue(right[0])[1], right[2]))),
+                        child: circularGoalProgression(
+                            swapFocusValues(right[0])[0],
+                            100.0,
+                            right[1],
+                            swapFocusValues(right[0])[1],
+                            right[2]))),
               ]),
               const Divider(
                 thickness: 1,
@@ -514,7 +555,12 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                     key: const Key('MapButton'),
                     text: 'Map',
                     image: 'Assets/map.png',
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const MapPage()));
+                    },
                   ),
                   NavigationButton(
                     key: const Key('RaceButton'),
@@ -526,7 +572,12 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                     key: const Key('LeaderboardButton'),
                     text: 'Leaderboard',
                     image: 'Assets/leaderboard.png',
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const LeaderboardStep()));
+                    },
                   )
                 ],
               )
