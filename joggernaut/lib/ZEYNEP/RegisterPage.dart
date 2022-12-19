@@ -31,18 +31,28 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Future signUp() async {
     // aauthenticaten user
-    await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      email: _emailController.text.trim(),
-      password: _passwordController.text.trim(),
-    );
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
 
-    //adding user details
+      //adding user details
 
-    addUserDetails(
-      _firstnameController.text.trim(),
-      _lastnameController.text.trim(),
-      _emailController.text.trim(),
-    );
+      addUserDetails(
+        _firstnameController.text.trim(),
+        _lastnameController.text.trim(),
+        _emailController.text.trim(),
+      );
+    } on FirebaseAuthException catch (e) {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              content: Text(e.message.toString()),
+            );
+          });
+    }
   }
 
   Future addUserDetails(String firstname, String lastname, String email) async {
