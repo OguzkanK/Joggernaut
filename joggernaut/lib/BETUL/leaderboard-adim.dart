@@ -70,7 +70,7 @@ class _LeaderboardStepState extends State<LeaderboardStep> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromRGBO(23, 23, 23, 1),
+      backgroundColor: Color.fromARGB(255, 14, 14, 14),
       appBar: AppBar(
         leading: Builder(
           builder: (BuildContext context) {
@@ -199,7 +199,7 @@ class _LeaderboardStepState extends State<LeaderboardStep> {
                     style: TextStyle(fontSize: 25, color: Colors.white)),
               ),
               decoration: BoxDecoration(
-                color: Color.fromRGBO(31, 70, 101, 1),
+                color: Color.fromARGB(255, 33, 71, 132),
                 //borderRadius: BorderRadius.only(
                 //bottomRight: Radius.circular(20),
                 //bottomLeft: Radius.circular(20))

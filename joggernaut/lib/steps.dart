@@ -79,6 +79,11 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   String _status = 'Loading';
   String _steps = '0';
   String bufferNow = "";
+  String selectedTime = "0";
+  String selectedKcal = "0";
+  String selectedSteps = "0";
+
+  bool isSelectedDayToday = true;
 
   @override
   void initState() {
@@ -110,9 +115,47 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
 
     if (querySnapshot.docs.isNotEmpty) {
       final documentSnapshot = querySnapshot.docs.first;
-      await documentSnapshot.reference.update(
-          {'step': int.parse(_steps), 'daily_step': int.parse(dailySteps())});
+      await documentSnapshot.reference.set({
+        'step': int.parse(_steps),
+        'calendar': {
+          now(): {
+            'step': dailySteps(),
+            'time': dailyTime(),
+            'kcal': caloriesBurned().toInt().toString()
+          }
+        }
+      }, SetOptions(merge: true));
     }
+  }
+
+  void reset() {
+    selectedTime = "0";
+    selectedKcal = "0";
+    selectedSteps = "0";
+  }
+
+  void getData() async {
+    final User user = auth.currentUser!;
+    final collectionReference = FirebaseFirestore.instance.collection('users');
+
+    final query = collectionReference.where('email', isEqualTo: user.email);
+    final querySnapshot = await query.get();
+    setState(() {
+      if (querySnapshot.docs.isNotEmpty) {
+        final db = querySnapshot.docs.first;
+        try {
+          final data =
+              db.data()['calendar'][DateFormat.MMMd().format(selectedDate)];
+          selectedTime = data["time"];
+          selectedKcal = data["kcal"];
+          selectedSteps = data["step"];
+        } catch (e) {
+          reset();
+        }
+      } else {
+        reset();
+      }
+    });
   }
 
   double goalPercentage(double goal, double progress) {
@@ -180,7 +223,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
         bufferNow = now();
       });
     }
-    saveToDB();
+    if (isSelectedDayToday) saveToDB();
   }
 
   void walkingTime() {
@@ -207,8 +250,16 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
     return DateFormat.MMMd().format(DateTime.now());
   }
 
+  String dailyTime() {
+    return (isSelectedDayToday)
+        ? "${(activeTime ~/ 3600).toString().padLeft(2, '0')}:${((activeTime % 3600) ~/ 60).toString().padLeft(2, '0')}"
+        : selectedTime;
+  }
+
   String dailySteps() {
-    return (int.parse(_steps) - previousSteps).toString();
+    return (isSelectedDayToday)
+        ? (int.parse(_steps) - previousSteps).toString()
+        : selectedSteps;
   }
 
   String stepsLeft() {
@@ -217,7 +268,9 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   }
 
   double caloriesBurned() {
-    return double.parse(dailySteps()) * 0.04 * (weight / 75);
+    return (isSelectedDayToday)
+        ? double.parse(dailySteps()) * 0.04 * (weight / 75)
+        : double.parse(selectedKcal);
   }
 
   Future<void> saveValue() async {
@@ -270,8 +323,6 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
             animationDuration: 1500,
             axes: <RadialAxis>[
               RadialAxis(
-                  //startAngle: 270, çember
-                  //endAngle: 270,
                   annotations: <GaugeAnnotation>[
                     GaugeAnnotation(
                         widget: SizedBox(
@@ -291,7 +342,6 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                   ),
                   pointers: <GaugePointer>[
                     RangePointer(
-                      cornerStyle: CornerStyle.bothCurve,
                       value: percentage * 100,
                       width: 0.10,
                       sizeUnit: GaugeSizeUnit.factor,
@@ -319,8 +369,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
         percent = stepGoalPercentage();
         break;
       case 1:
-        value =
-            "${(activeTime ~/ 3600).toString().padLeft(2, '0')}:${((activeTime % 3600) ~/ 60).toString().padLeft(2, '0')}";
+        value = dailyTime();
         percent = timeGoalPercentage();
         break;
       case 2:
@@ -394,6 +443,8 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                       setState(() {
                         selectedDate =
                             selectedDate.subtract(const Duration(days: 1));
+                        isSelectedDayToday = false;
+                        getData();
                       });
                     }),
                 Text(
@@ -411,6 +462,13 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                         if (DateFormat.MMMd().format(selectedDate) != now()) {
                           selectedDate =
                               selectedDate.add(const Duration(days: 1));
+                        }
+                        if (DateFormat.MMMd().format(selectedDate) != now()) {
+                          isSelectedDayToday = false;
+                          getData();
+                        } else {
+                          isSelectedDayToday = true;
+                          reset();
                         }
                       });
                     })
