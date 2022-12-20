@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:intl/intl.dart';
 import 'BETUL/leaderboard-adim.dart';
+import 'ZEYNEP/SettingsPage.dart';
 
 DateTime selectedDate = DateTime.now();
 
@@ -403,34 +404,12 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
             title: const Text('Joggernaut'),
             backgroundColor: mainColor,
             leading: IconButton(
-              icon: const Icon(Icons.density_medium),
+              icon: const Icon(Icons.settings),
               onPressed: () {
-                globalKey.currentState!.openDrawer();
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => SettingsPage()));
               },
             )),
-        drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              SizedBox(
-                  height: AppBar().preferredSize.height +
-                      MediaQuery.of(context).padding.top +
-                      8,
-                  child: const DrawerHeader(
-                    decoration: BoxDecoration(color: mainColor),
-                    child: Text('Dashboard'),
-                  )),
-              ListTile(
-                title: const Text('Item 1'),
-                onTap: () {},
-              ),
-              ListTile(
-                title: const Text('Item 2'),
-                onTap: () {},
-              ),
-            ],
-          ),
-        ),
         body: Container(
           color: black,
           child: Column(
