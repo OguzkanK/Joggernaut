@@ -29,9 +29,12 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  google_sign_in: ^5.4.2
+  google_sign_in: ^5.4.2  #Google sign in için firebase paketi -ZEYNEP
   cloud_firestore: ^4.1.0
   firebase_auth: ^4.2.0
+  firebase_storage: ^11.0.8
+  image_picker: ^0.8.6  #Profil fotoğrafı koymak için -ZEYNEP
+  flutter_settings_screens: ^0.3.3-null-safety+2 #settings ekranı için kullanılan paket -ZEYNEP
   flutter:
     sdk: flutter
 
