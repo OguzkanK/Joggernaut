@@ -38,7 +38,7 @@ class NavigationButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: (MediaQuery.of(context).size.width / 4),
+      width: (MediaQuery.of(context).size.width / 3),
       height: 50,
       child: ElevatedButton(
         onPressed: onPressed,
@@ -524,47 +524,38 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width / 3,
-                    child: NavigationButton(
-                      key: const Key('HomeButton'),
-                      text: 'Home',
-                      image: 'Assets/home.png',
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const StepsPage()));
-                      },
-                    ),
+                  NavigationButton(
+                    key: const Key('HomeButton'),
+                    text: 'Home',
+                    image: 'Assets/home.png',
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const StepsPage()));
+                    },
                   ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width / 3,
-                    child: NavigationButton(
-                      key: const Key('RaceButton'),
-                      text: 'Race',
-                      image: 'Assets/race.png',
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const MapPage()));
-                      },
-                    ),
+                  NavigationButton(
+                    key: const Key('RaceButton'),
+                    text: 'Race',
+                    image: 'Assets/race.png',
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const MapPage()));
+                    },
                   ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width / 3,
-                    child: NavigationButton(
-                      key: const Key('LeaderboardButton'),
-                      text: 'Leaderboard',
-                      image: 'Assets/leaderboard.png',
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const LeaderboardStep()));
-                      },
-                    ),
+                  NavigationButton(
+                    key: const Key('LeaderboardButton'),
+                    text: 'Leaderboard',
+                    image: 'Assets/leaderboard.png',
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const LeaderboardStep()));
+                    },
                   ),
                 ],
               )
