@@ -94,17 +94,10 @@ class _SettingsPageState extends State<SettingsPage> {
                 children: <Widget>[
                   buildProfilePic(),
                   buildLogout(),
-                  buildDeleteAccount(),
                 ],
               ),
-              const SizedBox(height: 32),
-              SettingsGroup(
-                title: 'FEEDBACK',
-                children: <Widget>[
-                  buildReportBug(context),
-                  buildSendFeedback(context),
-                ],
-              ),
+              const SizedBox(height: 320),
+              Center(child: Text("version 1.0")),
             ],
           ),
         ),
