@@ -299,45 +299,48 @@ class _MapPageState extends State<MapPage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                NavigationButton(
-                  key: const Key('HomeButton'),
-                  text: 'Home',
-                  image: 'Assets/home.png',
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const StepsPage()));
-                  },
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 3,
+                  child: NavigationButton(
+                    key: const Key('HomeButton'),
+                    text: 'Home',
+                    image: 'Assets/home.png',
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const StepsPage()));
+                    },
+                  ),
                 ),
-                NavigationButton(
-                  key: const Key('MapButton'),
-                  text: 'Map',
-                  image: 'Assets/map.png',
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const MapPage()));
-                  },
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 3,
+                  child: NavigationButton(
+                    key: const Key('RaceButton'),
+                    text: 'Race',
+                    image: 'Assets/race.png',
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const MapPage()));
+                    },
+                  ),
                 ),
-                NavigationButton(
-                  key: const Key('RaceButton'),
-                  text: 'Race',
-                  image: 'Assets/race.png',
-                  onPressed: () {},
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 3,
+                  child: NavigationButton(
+                    key: const Key('LeaderboardButton'),
+                    text: 'Leaderboard',
+                    image: 'Assets/leaderboard.png',
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const LeaderboardStep()));
+                    },
+                  ),
                 ),
-                NavigationButton(
-                  key: const Key('LeaderboardButton'),
-                  text: 'Leaderboard',
-                  image: 'Assets/leaderboard.png',
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const LeaderboardStep()));
-                  },
-                )
               ],
             )
           ],
