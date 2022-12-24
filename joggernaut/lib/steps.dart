@@ -38,7 +38,7 @@ class NavigationButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: (MediaQuery.of(context).size.width / 4),
+      width: (MediaQuery.of(context).size.width / 3),
       height: 50,
       child: ElevatedButton(
         onPressed: onPressed,
@@ -68,11 +68,13 @@ class StepsPage extends StatefulWidget {
 class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   int previousSteps = 0; // database?
   int activeTime = 0; // database
-  int weight = 70; // database
+  int weight = 0; // database
+  int height = 0;
 
   double kcalGoal = 400.0; // database
   double stepGoal = 10000.0; // database
   double timeGoal = 7000.0; // database
+  double kmGoal = 0.00;
 
   late Stream<StepCount> _stepCountStream;
   late Stream<PedestrianStatus> _pedestrianStatusStream;
@@ -80,9 +82,10 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   String _status = 'Loading';
   String _steps = '0';
   String bufferNow = "";
-  String selectedTime = "0";
+  String selectedTime = "00:00";
   String selectedKcal = "0";
   String selectedSteps = "0";
+  String selectedKm = "0.00";
 
   bool isSelectedDayToday = true;
 
@@ -95,7 +98,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
 
     WidgetsBinding.instance.addObserver(this);
     retrieveData();
-
+    initData();
     initPlatformState();
   }
 
@@ -122,7 +125,8 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
           now(): {
             'step': dailySteps(),
             'time': dailyTime(),
-            'kcal': caloriesBurned().toInt().toString()
+            'kcal': caloriesBurned().toInt().toString(),
+            'km': kmRunned().toString(),
           }
         }
       }, SetOptions(merge: true));
@@ -130,9 +134,29 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   }
 
   void reset() {
-    selectedTime = "0";
+    selectedTime = "00:00";
     selectedKcal = "0";
     selectedSteps = "0";
+    selectedKm = "0.00";
+  }
+
+  void initData() async {
+    final User user = auth.currentUser!;
+    final collectionReference = FirebaseFirestore.instance.collection('users');
+
+    final query = collectionReference.where('email', isEqualTo: user.email);
+    final querySnapshot = await query.get();
+    setState(() {
+      if (querySnapshot.docs.isNotEmpty) {
+        final db = querySnapshot.docs.first;
+        height = db.data()['height'];
+        weight = db.data()['weight'];
+        stepGoal = db.data()['stepGoal'];
+        kcalGoal = db.data()['kcalGoal'];
+        timeGoal = db.data()['timeGoal'];
+        kmGoal = db.data()['kmGoal'];
+      }
+    });
   }
 
   void getData() async {
@@ -150,6 +174,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
           selectedTime = data["time"];
           selectedKcal = data["kcal"];
           selectedSteps = data["step"];
+          selectedKm = data["km"];
         } catch (e) {
           reset();
         }
@@ -175,6 +200,10 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
 
   double timeGoalPercentage() {
     return goalPercentage(timeGoal, activeTime.toDouble());
+  }
+
+  double kmGoalPercentage() {
+    return goalPercentage(kmGoal, kmRunned());
   }
 
   void onStepCount(StepCount event) {
@@ -271,6 +300,12 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   double caloriesBurned() {
     return (isSelectedDayToday)
         ? double.parse(dailySteps()) * 0.04 * (weight / 75)
+        : double.parse(selectedKcal);
+  }
+
+  double kmRunned() {
+    return (isSelectedDayToday)
+        ? double.parse(dailySteps()) * 0.00065 * (height / 175)
         : double.parse(selectedKcal);
   }
 
@@ -378,8 +413,8 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
         percent = kcalGoalPercentage();
         break;
       case 3:
-        value = "5.00";
-        percent = 1.0;
+        value = kmRunned().toString();
+        percent = kmGoalPercentage();
         break;
     }
     return [percent, value];
@@ -524,47 +559,38 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width / 3,
-                    child: NavigationButton(
-                      key: const Key('HomeButton'),
-                      text: 'Home',
-                      image: 'Assets/home.png',
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const StepsPage()));
-                      },
-                    ),
+                  NavigationButton(
+                    key: const Key('HomeButton'),
+                    text: 'Home',
+                    image: 'Assets/home.png',
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const StepsPage()));
+                    },
                   ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width / 3,
-                    child: NavigationButton(
-                      key: const Key('RaceButton'),
-                      text: 'Race',
-                      image: 'Assets/race.png',
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const MapPage()));
-                      },
-                    ),
+                  NavigationButton(
+                    key: const Key('RaceButton'),
+                    text: 'Race',
+                    image: 'Assets/race.png',
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const MapPage()));
+                    },
                   ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width / 3,
-                    child: NavigationButton(
-                      key: const Key('LeaderboardButton'),
-                      text: 'Leaderboard',
-                      image: 'Assets/leaderboard.png',
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const LeaderboardStep()));
-                      },
-                    ),
+                  NavigationButton(
+                    key: const Key('LeaderboardButton'),
+                    text: 'Leaderboard',
+                    image: 'Assets/leaderboard.png',
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const LeaderboardStep()));
+                    },
                   ),
                 ],
               )
