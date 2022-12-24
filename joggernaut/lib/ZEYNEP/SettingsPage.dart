@@ -56,15 +56,9 @@ class _SettingsPageState extends State<SettingsPage> {
       leading: IconWidget(icon: Icons.logout, color: Colors.blue),
       onTap: () {
         FirebaseAuth.instance.signOut();
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => LoginPage(
-                      showRegisterPage: () {},
-                    )));
+        Navigator.popUntil(
+            context, ModalRoute.withName(Navigator.defaultRouteName));
       });
-
-  
 
   @override
   Widget build(BuildContext context) => Scaffold(

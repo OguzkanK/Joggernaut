@@ -95,7 +95,6 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
 
     Timer.periodic(const Duration(seconds: 15), (Timer t) => dayChecker());
     Timer.periodic(const Duration(seconds: 1), (Timer t) => walkingTime());
-    Timer.periodic(const Duration(seconds: 1), (Timer t) => initData());
     initData();
     WidgetsBinding.instance.addObserver(this);
     retrieveData();
