@@ -4,25 +4,35 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "joggernaut",
             "cwd": "joggernaut",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "args": [
+                "--no-sound-null-safety"
+            ]
         },
         {
             "name": "joggernaut (profile mode)",
             "cwd": "joggernaut",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "profile"
+            "flutterMode": "profile",
+            "args": [
+                "--no-sound-null-safety"
+            ]
         },
         {
             "name": "joggernaut (release mode)",
             "cwd": "joggernaut",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "release"
+            "flutterMode": "release",
+            "args": [
+                "--no-sound-null-safety"
+            ]
         }
     ]
 }
