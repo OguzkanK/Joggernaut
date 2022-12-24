@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -17,7 +18,20 @@ class GoogleSignInProvider extends ChangeNotifier {
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
+
     await FirebaseAuth.instance.signInWithCredential(credential);
     notifyListeners();
+
+    //burdan aşağısında google login ile ilk defa giriş yapılıyorsa users collectionuna kaydetmek için olan kodlar var.
+    var result = await FirebaseAuth.instance.signInWithCredential(credential);
+    if (result.user!.metadata.creationTime !=
+        result.user!.metadata.lastSignInTime) {
+      await FirebaseFirestore.instance.collection('users').add({
+        'Full Name': result.user?.displayName,
+        'Email': result.user?.email,
+      });
+    } else {
+      print(result.additionalUserInfo!.isNewUser);
+    }
   }
 }

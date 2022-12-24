@@ -11,6 +11,7 @@ import 'package:pedometer/pedometer.dart';
 import 'package:intl/intl.dart';
 import 'BETUL/leaderboard-adim.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'ZEYNEP/SettingsPage.dart';
 
 DateTime selectedDate = DateTime.now();
 
@@ -38,7 +39,7 @@ class NavigationButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: (MediaQuery.of(context).size.width / 4),
+      width: (MediaQuery.of(context).size.width / 3),
       height: 50,
       child: ElevatedButton(
         onPressed: onPressed,
@@ -68,11 +69,13 @@ class StepsPage extends StatefulWidget {
 class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   int previousSteps = 0; // database?
   int activeTime = 0; // database
-  int weight = 70; // database
+  int weight = 0; // database
+  int height = 0;
 
   double kcalGoal = 400.0; // database
   double stepGoal = 10000.0; // database
   double timeGoal = 7000.0; // database
+  double kmGoal = 0.00;
 
   late Stream<StepCount> _stepCountStream;
   late Stream<PedestrianStatus> _pedestrianStatusStream;
@@ -80,9 +83,10 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   String _status = 'Loading';
   String _steps = '0';
   String bufferNow = "";
-  String selectedTime = "0";
+  String selectedTime = "00:00";
   String selectedKcal = "0";
   String selectedSteps = "0";
+  String selectedKm = "0.00";
 
   bool isSelectedDayToday = true;
 
@@ -96,7 +100,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     retrieveData();
     _requestPermission();
-
+    initData();
     initPlatformState();
   }
 
@@ -123,7 +127,8 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
           now(): {
             'step': dailySteps(),
             'time': dailyTime(),
-            'kcal': caloriesBurned().toInt().toString()
+            'kcal': caloriesBurned().toInt().toString(),
+            'km': kmRunned().toString(),
           }
         }
       }, SetOptions(merge: true));
@@ -131,9 +136,29 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   }
 
   void reset() {
-    selectedTime = "0";
+    selectedTime = "00:00";
     selectedKcal = "0";
     selectedSteps = "0";
+    selectedKm = "0.00";
+  }
+
+  void initData() async {
+    final User user = auth.currentUser!;
+    final collectionReference = FirebaseFirestore.instance.collection('users');
+
+    final query = collectionReference.where('email', isEqualTo: user.email);
+    final querySnapshot = await query.get();
+    setState(() {
+      if (querySnapshot.docs.isNotEmpty) {
+        final db = querySnapshot.docs.first;
+        height = db.data()['height'];
+        weight = db.data()['weight'];
+        stepGoal = db.data()['stepGoal'];
+        kcalGoal = db.data()['kcalGoal'];
+        timeGoal = db.data()['timeGoal'];
+        kmGoal = db.data()['kmGoal'];
+      }
+    });
   }
 
   void getData() async {
@@ -151,6 +176,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
           selectedTime = data["time"];
           selectedKcal = data["kcal"];
           selectedSteps = data["step"];
+          selectedKm = data["km"];
         } catch (e) {
           reset();
         }
@@ -176,6 +202,10 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
 
   double timeGoalPercentage() {
     return goalPercentage(timeGoal, activeTime.toDouble());
+  }
+
+  double kmGoalPercentage() {
+    return goalPercentage(kmGoal, kmRunned());
   }
 
   void onStepCount(StepCount event) {
@@ -321,6 +351,12 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
         : double.parse(selectedKcal);
   }
 
+  double kmRunned() {
+    return (isSelectedDayToday)
+        ? double.parse(dailySteps()) * 0.00065 * (height / 175)
+        : double.parse(selectedKcal);
+  }
+
   Future<void> saveValue() async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -425,8 +461,8 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
         percent = kcalGoalPercentage();
         break;
       case 3:
-        value = "5.00";
-        percent = 1.0;
+        value = kmRunned().toString();
+        percent = kmGoalPercentage();
         break;
     }
     return [percent, value];
@@ -451,34 +487,12 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
             title: const Text('Joggernaut'),
             backgroundColor: mainColor,
             leading: IconButton(
-              icon: const Icon(Icons.density_medium),
+              icon: const Icon(Icons.settings),
               onPressed: () {
-                globalKey.currentState!.openDrawer();
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => SettingsPage()));
               },
             )),
-        drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              SizedBox(
-                  height: AppBar().preferredSize.height +
-                      MediaQuery.of(context).padding.top +
-                      8,
-                  child: const DrawerHeader(
-                    decoration: BoxDecoration(color: mainColor),
-                    child: Text('Dashboard'),
-                  )),
-              ListTile(
-                title: const Text('Item 1'),
-                onTap: () {},
-              ),
-              ListTile(
-                title: const Text('Item 2'),
-                onTap: () {},
-              ),
-            ],
-          ),
-        ),
         body: Container(
           color: black,
           child: Column(
@@ -597,24 +611,23 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                     key: const Key('HomeButton'),
                     text: 'Home',
                     image: 'Assets/home.png',
-                    onPressed: () {},
-                  ),
-                  NavigationButton(
-                    key: const Key('MapButton'),
-                    text: 'Map',
-                    image: 'Assets/map.png',
                     onPressed: () {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const MapPage()));
+                              builder: (context) => const StepsPage()));
                     },
                   ),
                   NavigationButton(
                     key: const Key('RaceButton'),
                     text: 'Race',
                     image: 'Assets/race.png',
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const MapPage()));
+                    },
                   ),
                   NavigationButton(
                     key: const Key('LeaderboardButton'),
@@ -626,7 +639,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                           MaterialPageRoute(
                               builder: (context) => const LeaderboardStep()));
                     },
-                  )
+                  ),
                 ],
               )
             ],
