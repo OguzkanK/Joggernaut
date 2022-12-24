@@ -28,8 +28,6 @@ class _LeaderboardStepState extends State<LeaderboardStep> {
   }
 
   Future getUsersList() async {
-    print('en azından girdi be abi');
-
     try {
       await FirebaseFirestore.instance
           .collection('users')

@@ -63,7 +63,7 @@ dependencies:
   syncfusion_flutter_gauges: ^20.3.60
   shared_preferences: ^2.0.15
   firebase_database: ^10.0.7
-  permission_handler: '3.0.0'
+  permission_handler: ^10.2.0
 
 dev_dependencies:
   flutter_test:

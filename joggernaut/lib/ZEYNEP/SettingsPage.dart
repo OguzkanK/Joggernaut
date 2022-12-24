@@ -10,6 +10,7 @@ import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 import 'package:joggernaut/Widgets/IconWidget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:joggernaut/ZEYNEP/LoginPage.dart';
+import 'package:joggernaut/ZEYNEP/goalView.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -40,6 +41,16 @@ class _SettingsPageState extends State<SettingsPage> {
         setState(() {});
       });
 
+  Widget goals() => SimpleSettingsTile(
+      title: 'Personal Informations',
+      subtitle: 'Set new goals, change weight',
+      leading: IconWidget(icon: Icons.logout, color: Colors.blue),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const goalView()),
+        );
+      });
   Widget buildLogout() => SimpleSettingsTile(
       title: 'Logout',
       subtitle: '',
@@ -82,6 +93,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 children: <Widget>[
                   buildProfilePic(),
                   buildLogout(),
+                  goals(),
                 ],
               ),
               const SizedBox(height: 320),

@@ -100,7 +100,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
 
     WidgetsBinding.instance.addObserver(this);
     retrieveData();
-    _requestPermission();
+
     initData();
     initPlatformState();
   }
@@ -261,52 +261,6 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
 
   void walkingTime() {
     if (_status == "walking") ++activeTime;
-  }
-
-  void _requestPermission() async {
-    // Check if the permission is already granted
-    PermissionStatus permissionStatus = await PermissionHandler()
-        .checkPermissionStatus(PermissionGroup.sensors);
-    if (permissionStatus == PermissionStatus.granted) {
-      // Permission already granted, do nothing
-      return;
-    }
-
-    // Check if the user has previously denied the permission
-    bool shouldShowRequestPermissionRationale = await PermissionHandler()
-        .shouldShowRequestPermissionRationale(PermissionGroup.sensors);
-
-    if (shouldShowRequestPermissionRationale) {
-      // Provide an explanation before requesting the permission again
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Permission needed'),
-          content: const Text(
-              'We need access to your pedometer data to provide step count information. Please grant the permission.'),
-          actions: <Widget>[
-            ElevatedButton(
-              child: const Text('Ok'),
-              onPressed: () {
-                // Request the permission again
-                _requestPermission();
-              },
-            ),
-          ],
-        ),
-      );
-      return;
-    }
-
-    // Request the permission
-    Map<PermissionGroup, PermissionStatus> permissions =
-        await PermissionHandler().requestPermissions([PermissionGroup.sensors]);
-
-    if (permissions[PermissionGroup.sensors] == PermissionStatus.granted) {
-      // Permission granted, do something
-    } else {
-      // Permission denied, do something else
-    }
   }
 
   void swapFocus(String direction) {
@@ -587,7 +541,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
                 color: mainColor,
               ),
               const Text(
-                'Pedestrian status:',
+                'Pedestrian status',
                 style: TextStyle(fontSize: 15, color: Colors.white),
               ),
               Image.asset(
