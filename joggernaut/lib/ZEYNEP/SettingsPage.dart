@@ -54,16 +54,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     )));
       });
 
-  Widget buildDeleteAccount() => SimpleSettingsTile(
-      title: 'Delete Account',
-      subtitle: '',
-      leading: IconWidget(icon: Icons.delete, color: Colors.red),
-      onTap: () {
-        final User user = auth.currentUser!;
-        final uid = user.uid!;
-        FirebaseFirestore.instance.collection('users').doc(uid).delete();
-      });
-
   Widget buildReportBug(BuildContext context) => SimpleSettingsTile(
       title: 'Report A Bug',
       subtitle: '',
