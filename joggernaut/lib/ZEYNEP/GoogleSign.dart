@@ -29,14 +29,15 @@ class GoogleSignInProvider extends ChangeNotifier {
         result.user!.metadata.lastSignInTime) {
       await FirebaseFirestore.instance.collection('users').add({
         'Full Name': result.user?.displayName,
-        'Email': result.user?.email,
+        'Email': result.user?.email!.toLowerCase(),
         'height': 0,
         'weight': 0,
         'kcalGoal': 0,
         'timeGoal': 0,
         'kmGoal': 0,
+        'flag': 0
       });
-      MaterialPageRoute(builder: (context) => goalView());
+      MaterialPageRoute(builder: (context) => const GoalView());
     } else {
       print(result.additionalUserInfo!.isNewUser);
     }

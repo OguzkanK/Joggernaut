@@ -10,8 +10,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:intl/intl.dart';
 import 'BETUL/leaderboard-adim.dart';
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:permission_handler/permission_handler.dart';
 import 'ZEYNEP/SettingsPage.dart';
 
 DateTime selectedDate = DateTime.now();
@@ -76,7 +74,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   double kcalGoal = 400.0; // database
   double stepGoal = 10000.0; // database
   double timeGoal = 7000.0; // database
-  double kmGoal = 0.00;
+  double kmGoal = 7.0;
 
   late Stream<StepCount> _stepCountStream;
   late Stream<PedestrianStatus> _pedestrianStatusStream;
@@ -87,7 +85,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   String selectedTime = "00:00";
   String selectedKcal = "0";
   String selectedSteps = "0";
-  String selectedKm = "0.00";
+  String selectedKm = "0.0";
 
   bool isSelectedDayToday = true;
 
@@ -97,11 +95,10 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
 
     Timer.periodic(const Duration(seconds: 15), (Timer t) => dayChecker());
     Timer.periodic(const Duration(seconds: 1), (Timer t) => walkingTime());
-
+    Timer.periodic(const Duration(seconds: 1), (Timer t) => initData());
+    initData();
     WidgetsBinding.instance.addObserver(this);
     retrieveData();
-
-    initData();
     initPlatformState();
   }
 
@@ -129,7 +126,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
             'step': dailySteps(),
             'time': dailyTime(),
             'kcal': caloriesBurned().toInt().toString(),
-            'km': kmRunned().toString(),
+            'km': kmRunned().toStringAsFixed(2),
           }
         }
       }, SetOptions(merge: true));
@@ -140,10 +137,10 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
     selectedTime = "00:00";
     selectedKcal = "0";
     selectedSteps = "0";
-    selectedKm = "0.00";
+    selectedKm = "0.0";
   }
 
-  void initData() async {
+  Future<void> initData() async {
     final User user = auth.currentUser!;
     final collectionReference = FirebaseFirestore.instance.collection('users');
 
@@ -154,10 +151,10 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
         final db = querySnapshot.docs.first;
         height = db.data()['height'];
         weight = db.data()['weight'];
-        stepGoal = db.data()['stepGoal'];
-        kcalGoal = db.data()['kcalGoal'];
-        timeGoal = db.data()['timeGoal'];
-        kmGoal = db.data()['kmGoal'];
+        stepGoal = db.data()['stepGoal'].toDouble();
+        kcalGoal = db.data()['kcalGoal'].toDouble();
+        timeGoal = db.data()['timeGoal'].toDouble();
+        kmGoal = db.data()['kmGoal'].toDouble();
       }
     });
   }
@@ -246,7 +243,6 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   }
 
   void dayChecker() {
-    // kaydedilen ay/gün şuanki tarihten farklıysa gün değişmiştir
     if (bufferNow != now()) {
       saveStep();
       setState(() {
@@ -309,7 +305,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
   double kmRunned() {
     return (isSelectedDayToday)
         ? double.parse(dailySteps()) * 0.00065 * (height / 175)
-        : double.parse(selectedKcal);
+        : double.parse(selectedKm);
   }
 
   Future<void> saveValue() async {
@@ -416,7 +412,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
         percent = kcalGoalPercentage();
         break;
       case 3:
-        value = kmRunned().toString();
+        value = kmRunned().toStringAsFixed(2);
         percent = kmGoalPercentage();
         break;
     }

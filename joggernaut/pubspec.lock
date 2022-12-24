@@ -8,7 +8,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.11"
-    version: "1.0.11"
   archive:
     dependency: transitive
     description:
@@ -598,13 +597,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.2.2"
-  permission_handler:
-    dependency: "direct main"
-    description:
-      name: permission_handler
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.0.0"
   petitparser:
     dependency: transitive
     description:

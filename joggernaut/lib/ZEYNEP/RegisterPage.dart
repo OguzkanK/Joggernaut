@@ -86,13 +86,14 @@ class _RegisterPageState extends State<RegisterPage> {
     await FirebaseFirestore.instance.collection('users').add({
       'First Name': firstname,
       'Last Name': lastname,
-      'email': email,
+      'email': email.toLowerCase(),
       'stepGoal': stepgoal,
       'height': height,
       'weight': weight,
       'kcalGoal': kcalgoal,
       'timeGoal': timegoal,
       'kmGoal': kmGoal,
+      'flag': 0
     });
   }
 

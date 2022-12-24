@@ -248,7 +248,7 @@ class _MapPageState extends State<MapPage> {
               child: GoogleMap(
                 // The map
                 compassEnabled: true,
-                mapType: MapType.hybrid,
+                mapType: MapType.normal,
                 initialCameraPosition: const CameraPosition(
                   target: LatLng(0, 0),
                   zoom: 15.5,

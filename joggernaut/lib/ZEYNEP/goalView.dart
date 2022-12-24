@@ -3,14 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class goalView extends StatefulWidget {
-  const goalView({super.key});
+class GoalView extends StatefulWidget {
+  const GoalView({super.key});
 
   @override
-  State<goalView> createState() => _goalViewState();
+  State<GoalView> createState() => _GoalViewState();
 }
 
-class _goalViewState extends State<goalView> {
+class _GoalViewState extends State<GoalView> {
   // text conterollers
 
   final _stepGoalController = TextEditingController();
