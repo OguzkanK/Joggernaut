@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:intl/intl.dart';
 import 'BETUL/leaderboard-adim.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'ZEYNEP/SettingsPage.dart';
 
 DateTime selectedDate = DateTime.now();
@@ -98,6 +99,7 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
 
     WidgetsBinding.instance.addObserver(this);
     retrieveData();
+    _requestPermission();
     initData();
     initPlatformState();
   }
@@ -258,6 +260,52 @@ class StateStepsPage extends State<StepsPage> with WidgetsBindingObserver {
 
   void walkingTime() {
     if (_status == "walking") ++activeTime;
+  }
+
+  void _requestPermission() async {
+    // Check if the permission is already granted
+    PermissionStatus permissionStatus = await PermissionHandler()
+        .checkPermissionStatus(PermissionGroup.sensors);
+    if (permissionStatus == PermissionStatus.granted) {
+      // Permission already granted, do nothing
+      return;
+    }
+
+    // Check if the user has previously denied the permission
+    bool shouldShowRequestPermissionRationale = await PermissionHandler()
+        .shouldShowRequestPermissionRationale(PermissionGroup.sensors);
+
+    if (shouldShowRequestPermissionRationale) {
+      // Provide an explanation before requesting the permission again
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Permission needed'),
+          content: const Text(
+              'We need access to your pedometer data to provide step count information. Please grant the permission.'),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text('Ok'),
+              onPressed: () {
+                // Request the permission again
+                _requestPermission();
+              },
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    // Request the permission
+    Map<PermissionGroup, PermissionStatus> permissions =
+        await PermissionHandler().requestPermissions([PermissionGroup.sensors]);
+
+    if (permissions[PermissionGroup.sensors] == PermissionStatus.granted) {
+      // Permission granted, do something
+    } else {
+      // Permission denied, do something else
+    }
   }
 
   void swapFocus(String direction) {

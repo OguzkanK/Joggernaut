@@ -8,6 +8,8 @@ import 'package:joggernaut/steps.dart';
 import 'package:location/location.dart';
 import 'dart:async';
 
+import 'ZEYNEP/SettingsPage.dart';
+
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
 
@@ -16,8 +18,10 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+  // Google Map Controller
   final Completer<GoogleMapController> _controller = Completer();
-  final TextEditingController _searchController = TextEditingController();
+
+  // Firebase Instance
   final FirebaseAuth auth = FirebaseAuth.instance;
 
   final globalKey = GlobalKey<ScaffoldState>();
@@ -26,9 +30,7 @@ class _MapPageState extends State<MapPage> {
   Color black = Color.fromARGB(255, 220, 214, 214);
 
   Location location = Location();
-
   var flagPoint;
-
   Set<Marker> markers = Set();
   Set<Circle> circles = Set();
 
@@ -38,11 +40,14 @@ class _MapPageState extends State<MapPage> {
     super.initState();
   }
 
+  // Gets the users flag point during the initialization
   Future<void> setFlagPointInit() async {
     try {
+      // Gets the current signed in user
       final User user = auth.currentUser!;
       List currentUserData = [];
 
+      // Gets the user's flag points from firebase
       await FirebaseFirestore.instance
           .collection('users')
           .where("email", isEqualTo: user.email)
@@ -79,12 +84,14 @@ class _MapPageState extends State<MapPage> {
     return randomLatLng;
   }
 
+  // Adds a flag point to the user's account if the user claimed a flag
   Future addFlagPoint() async {
     try {
       final User user = auth.currentUser!;
       List currentUserData = [];
       var newFlagPoint, docID;
 
+      // Gets user's flag points
       await FirebaseFirestore.instance
           .collection('users')
           .where("email", isEqualTo: user.email)
@@ -106,6 +113,7 @@ class _MapPageState extends State<MapPage> {
         flagPoint = newFlagPoint;
       }
 
+      // Sets user's new flag points
       FirebaseFirestore.instance
           .collection('users')
           .doc(docID)
@@ -118,9 +126,6 @@ class _MapPageState extends State<MapPage> {
 
   // Claim the flag if it's in user's range
   Future<void> claimFlag() async {
-    // 109.84697079152 m in users range to claim the flag
-    // 319.8563475922185m out of lost range
-
     if (markers.isNotEmpty) {
       LocationData userLocation = await location.getLocation();
 
@@ -130,6 +135,7 @@ class _MapPageState extends State<MapPage> {
           userLocation.latitude!,
           userLocation.longitude!);
 
+      // Checks to see if a flag is in the users claim range
       if (distanceToTheFlag <= 110) {
         addFlagPoint();
         markers = Set();
@@ -155,6 +161,7 @@ class _MapPageState extends State<MapPage> {
 
   void mapCreatedCallback(GoogleMapController controller) {
     location.onLocationChanged.listen((l) {
+      // The circle which represents the user's claim range
       Circle locationCircle = Circle(
         circleId: const CircleId("locationCircle"),
         center: LatLng(l.latitude!, l.longitude!),
@@ -178,6 +185,10 @@ class _MapPageState extends State<MapPage> {
       //   radius: 150,
       //   strokeColor: Color.fromARGB(204, 230, 62, 16),
       // );
+
+      // End of Debug Circles
+
+      // The circle which represents the user's range where the flag despawns
       Circle lostCircle = Circle(
         circleId: const CircleId("lostCircle"),
         center: LatLng(l.latitude!, l.longitude!),
@@ -185,8 +196,6 @@ class _MapPageState extends State<MapPage> {
         strokeWidth: 3,
         strokeColor: Color.fromARGB(255, 208, 5, 5),
       );
-
-      // End of Debug Circles
 
       if (mounted) {
         setState(() {
@@ -196,6 +205,7 @@ class _MapPageState extends State<MapPage> {
                 markers.first.position.longitude,
                 l.latitude,
                 l.longitude);
+            // Cheks to see if the flag went outside of the user's lost range during map callback
             if (distanceToTheFlag >= 320) {
               markers = Set();
               addRandomMarker();
@@ -221,19 +231,22 @@ class _MapPageState extends State<MapPage> {
       home: Scaffold(
         key: globalKey,
         appBar: AppBar(
-            title: const Text('Joggernaut'),
-            backgroundColor: mainColor,
-            leading: IconButton(
-              icon: const Icon(Icons.density_medium),
-              onPressed: () {
-                globalKey.currentState!.openDrawer();
-              },
-            )),
+          title: const Text('Joggernaut'),
+          backgroundColor: mainColor,
+          leading: IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => SettingsPage()));
+            },
+          ),
+        ),
         body: Column(
           children: [
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.7,
               child: GoogleMap(
+                // The map
                 compassEnabled: true,
                 mapType: MapType.hybrid,
                 initialCameraPosition: const CameraPosition(
@@ -262,36 +275,25 @@ class _MapPageState extends State<MapPage> {
                 backgroundColor: black,
                 body: Center(
                   child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Row(
-                          children: [
-                            Image.asset("Assets/red-flag.png", height: 48),
-                            Text(
-                              '${flagPoint ?? "Loading"}',
-                              style: const TextStyle(fontSize: 25),
-                            ),
-                          ],
-                        ),
-                        ElevatedButton(
-                          onPressed: claimFlag,
-                          child: const Text("Claim Flag"),
-                        ),
-                      ]),
-                  // ButtonBar(
-                  //   mainAxisSize: MainAxisSize.min,
-                  //   children: <Widget>[
-                  //     ElevatedButton(
-                  //       onPressed: addRandomMarker,
-                  //       child: const Text("Add Random Marker"),
-                  //     ),
-                  //     ElevatedButton(
-                  //       onPressed: claimFlag,
-                  //       child: const Text("Claim Flag"),
-                  //     ),
-                  //   ],
-                  // ),
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Row(
+                        // UI buttons
+                        children: [
+                          Image.asset("Assets/red-flag.png", height: 48),
+                          Text(
+                            '${flagPoint ?? "Loading"}',
+                            style: const TextStyle(fontSize: 25),
+                          ),
+                        ],
+                      ),
+                      ElevatedButton(
+                        onPressed: claimFlag,
+                        child: const Text("Claim Flag"),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -299,6 +301,7 @@ class _MapPageState extends State<MapPage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
+                // Naavigation buttons
                 NavigationButton(
                   key: const Key('HomeButton'),
                   text: 'Home',
@@ -336,16 +339,11 @@ class _MapPageState extends State<MapPage> {
             )
           ],
         ),
-        // floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-        // floatingActionButton: FloatingActionButton.extended(
-        //   onPressed: claimFlag,
-        //   label: const Text('Claim the Flag'),
-        //   icon: const Icon(Icons.flag),
-        // ),
       ),
     );
   }
 
+  // Adds a random flag arount the user
   Future<void> addRandomMarker() async {
     BitmapDescriptor flagIcon = await BitmapDescriptor.fromAssetImage(
       const ImageConfiguration(),
