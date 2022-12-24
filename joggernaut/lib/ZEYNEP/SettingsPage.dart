@@ -67,10 +67,10 @@ class _SettingsPageState extends State<SettingsPage> {
             padding: EdgeInsets.all(24),
             children: [
               CircleAvatar(
-                backgroundImage: NetworkImage(
-                  imageURL,
-                ),
                 radius: 150,
+                child: ClipOval(
+                    child: Image.network(
+                        width: 300, height: 300, imageURL, fit: BoxFit.cover)),
               ),
               SettingsGroup(
                 title: 'GENERAL',
