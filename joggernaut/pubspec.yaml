@@ -32,11 +32,13 @@ dependencies:
   google_sign_in: ^5.4.2  #Google sign in için firebase paketi -ZEYNEP
   cloud_firestore: ^4.1.0
   firebase_auth: ^4.2.0
+  flutter_launcher_icons: ^0.11.0  # logoyu değişmek için 
   firebase_storage: ^11.0.8
   image_picker: ^0.8.6  #Profil fotoğrafı koymak için -ZEYNEP
   flutter_settings_screens: ^0.3.3-null-safety+2 #settings ekranı için kullanılan paket -ZEYNEP
   flutter:
     sdk: flutter
+  
 
   dio: ^4.0.0
   location: ^4.4.0
@@ -66,12 +68,20 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+ 
+
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+
+flutter_icons:
+   android: "launcher_icon"
+   ios: true
+   image_path: "Assets/outerLogo.png"
+   min_sdk_android: 21
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -90,6 +100,7 @@ flutter:
     - Assets/logopng.png
     - Assets/background.jpeg
     - Assets/signup.jpg
+    - Assets/outerLogo.png
 
     - Assets/green/
     - Assets/blue/

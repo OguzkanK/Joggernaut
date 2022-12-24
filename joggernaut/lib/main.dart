@@ -7,11 +7,11 @@ import 'package:flutter_foreground_service/flutter_foreground_service.dart';
 import 'ZEYNEP/GoogleSign.dart';
 import 'ZEYNEP/RedirectPage.dart'; // Firebase import
 
-Future main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized(); //Firebase starting
   await Firebase.initializeApp(); //Firebase starting
-  runApp(const MyApp());
   startForegroundService();
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {

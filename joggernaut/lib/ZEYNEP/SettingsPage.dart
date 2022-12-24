@@ -2,7 +2,6 @@
 
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +9,7 @@ import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 import 'package:joggernaut/Widgets/IconWidget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:joggernaut/ZEYNEP/LoginPage.dart';
+import 'package:joggernaut/ZEYNEP/goalView.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -40,40 +40,25 @@ class _SettingsPageState extends State<SettingsPage> {
         setState(() {});
       });
 
+  Widget goals() => SimpleSettingsTile(
+      title: 'Personal Informations',
+      subtitle: 'Set new goals, change weight',
+      leading: IconWidget(icon: Icons.info, color: Colors.blue),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const GoalView()),
+        );
+      });
   Widget buildLogout() => SimpleSettingsTile(
       title: 'Logout',
       subtitle: '',
       leading: IconWidget(icon: Icons.logout, color: Colors.blue),
       onTap: () {
         FirebaseAuth.instance.signOut();
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => LoginPage(
-                      showRegisterPage: () {},
-                    )));
+        Navigator.popUntil(
+            context, ModalRoute.withName(Navigator.defaultRouteName));
       });
-
-  Widget buildDeleteAccount() => SimpleSettingsTile(
-      title: 'Delete Account',
-      subtitle: '',
-      leading: IconWidget(icon: Icons.delete, color: Colors.red),
-      onTap: () {
-        final User user = auth.currentUser!;
-        final uid = user.uid!;
-        FirebaseFirestore.instance.collection('users').doc(uid).delete();
-      });
-
-  Widget buildReportBug(BuildContext context) => SimpleSettingsTile(
-      title: 'Report A Bug',
-      subtitle: '',
-      leading: IconWidget(icon: Icons.bug_report, color: Colors.green),
-      onTap: () {});
-  Widget buildSendFeedback(BuildContext context) => SimpleSettingsTile(
-      title: 'Send Feedback',
-      subtitle: '',
-      leading: IconWidget(icon: Icons.delete, color: Colors.blueGrey),
-      onTap: () {});
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -82,16 +67,17 @@ class _SettingsPageState extends State<SettingsPage> {
             padding: EdgeInsets.all(24),
             children: [
               CircleAvatar(
-                backgroundImage: NetworkImage(
-                  imageURL,
-                ),
                 radius: 150,
+                child: ClipOval(
+                    child: Image.network(
+                        width: 300, height: 300, imageURL, fit: BoxFit.cover)),
               ),
               SettingsGroup(
                 title: 'GENERAL',
                 children: <Widget>[
                   buildProfilePic(),
                   buildLogout(),
+                  goals(),
                 ],
               ),
               const SizedBox(height: 320),
