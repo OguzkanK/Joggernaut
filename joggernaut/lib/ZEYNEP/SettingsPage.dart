@@ -43,7 +43,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget goals() => SimpleSettingsTile(
       title: 'Personal Informations',
       subtitle: 'Set new goals, change weight',
-      leading: IconWidget(icon: Icons.logout, color: Colors.blue),
+      leading: IconWidget(icon: Icons.info, color: Colors.blue),
       onTap: () {
         Navigator.push(
           context,
@@ -64,16 +64,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     )));
       });
 
-  Widget buildReportBug(BuildContext context) => SimpleSettingsTile(
-      title: 'Report A Bug',
-      subtitle: '',
-      leading: IconWidget(icon: Icons.bug_report, color: Colors.green),
-      onTap: () {});
-  Widget buildSendFeedback(BuildContext context) => SimpleSettingsTile(
-      title: 'Send Feedback',
-      subtitle: '',
-      leading: IconWidget(icon: Icons.delete, color: Colors.blueGrey),
-      onTap: () {});
+  
 
   @override
   Widget build(BuildContext context) => Scaffold(
