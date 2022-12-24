@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:intl/intl.dart';
 import 'BETUL/leaderboard-adim.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:permission_handler/permission_handler.dart';
 import 'ZEYNEP/SettingsPage.dart';
 
